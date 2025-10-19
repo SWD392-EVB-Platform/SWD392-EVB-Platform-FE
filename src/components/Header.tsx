@@ -2,9 +2,15 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import UserDropdown from './UserDropdown';
+import ClientOnly from './ClientOnly';
 
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  console.log('Header: isAuthenticated:', isAuthenticated, 'isLoading:', isLoading, 'user:', user);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -37,14 +43,33 @@ const Header: React.FC = () => {
           </Link>
         </nav>
 
-        {/* Auth Buttons */}
+        {/* Auth Buttons or User Dropdown */}
         <div className="hidden md:flex space-x-4">
-          <Link href="/login" className="px-4 py-2 border border-white text-white rounded-md hover:bg-white hover:text-black transition-colors duration-200 font-medium">
-            Sign in
-          </Link>
-          <Link href="/register" className="px-4 py-2 bg-yellow-400 text-black rounded-md hover:bg-yellow-300 transition-colors duration-200 font-medium">
-            Sign up
-          </Link>
+          <ClientOnly fallback={
+            <>
+              <Link href="/login" className="px-4 py-2 border border-white text-white rounded-md hover:bg-white hover:text-black transition-colors duration-200 font-medium">
+                Sign in
+              </Link>
+              <Link href="/register" className="px-4 py-2 bg-yellow-400 text-black rounded-md hover:bg-yellow-300 transition-colors duration-200 font-medium">
+                Sign up
+              </Link>
+            </>
+          }>
+            {isLoading ? (
+              <div className="w-8 h-8 bg-gray-600 rounded-full animate-pulse"></div>
+            ) : isAuthenticated ? (
+              <UserDropdown />
+            ) : (
+              <>
+                <Link href="/login" className="px-4 py-2 border border-white text-white rounded-md hover:bg-white hover:text-black transition-colors duration-200 font-medium">
+                  Sign in
+                </Link>
+                <Link href="/register" className="px-4 py-2 bg-yellow-400 text-black rounded-md hover:bg-yellow-300 transition-colors duration-200 font-medium">
+                  Sign up
+                </Link>
+              </>
+            )}
+          </ClientOnly>
         </div>
 
         {/* Mobile Menu Button */}
@@ -77,12 +102,35 @@ const Header: React.FC = () => {
               Contact
             </Link>
             <div className="border-t border-gray-700 my-2"></div>
-            <Link href="/login" className="block px-4 py-2 text-white border border-white rounded-md hover:bg-white hover:text-black transition-colors duration-200 font-medium">
-              Sign in
-            </Link>
-            <Link href="/register" className="block px-4 py-2 bg-yellow-400 text-black rounded-md hover:bg-yellow-300 transition-colors duration-200 font-medium">
-              Sign up
-            </Link>
+            <ClientOnly fallback={
+              <>
+                <Link href="/login" className="block px-4 py-2 text-white border border-white rounded-md hover:bg-white hover:text-black transition-colors duration-200 font-medium">
+                  Sign in
+                </Link>
+                <Link href="/register" className="block px-4 py-2 bg-yellow-400 text-black rounded-md hover:bg-yellow-300 transition-colors duration-200 font-medium">
+                  Sign up
+                </Link>
+              </>
+            }>
+              {isLoading ? (
+                <div className="px-4 py-2">
+                  <div className="w-8 h-8 bg-gray-600 rounded-full animate-pulse"></div>
+                </div>
+              ) : isAuthenticated ? (
+                <div className="px-4 py-2">
+                  <UserDropdown />
+                </div>
+              ) : (
+                <>
+                  <Link href="/login" className="block px-4 py-2 text-white border border-white rounded-md hover:bg-white hover:text-black transition-colors duration-200 font-medium">
+                    Sign in
+                  </Link>
+                  <Link href="/register" className="block px-4 py-2 bg-yellow-400 text-black rounded-md hover:bg-yellow-300 transition-colors duration-200 font-medium">
+                    Sign up
+                  </Link>
+                </>
+              )}
+            </ClientOnly>
           </nav>
         </div>
       )}

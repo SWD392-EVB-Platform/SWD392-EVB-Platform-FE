@@ -1,5 +1,6 @@
 // API service for authentication
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+const 
+API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 export interface LoginRequest {
   email: string;
@@ -59,10 +60,37 @@ export class ApiService {
         body: JSON.stringify(credentials),
       });
 
-      const data = await response.json();
+      // Parse response data first
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('Failed to parse response:', parseError);
+        throw new Error('Lỗi kết nối. Vui lòng thử lại');
+      }
 
+      // Check if response is successful
       if (!response.ok) {
-        throw new Error(data.message || 'Đăng nhập thất bại');
+        // Handle specific HTTP status codes
+        if (response.status === 401) {
+          throw new Error('Tài khoản hoặc mật khẩu không chính xác');
+        } else if (response.status === 404) {
+          throw new Error('Tài khoản không tồn tại');
+        } else if (response.status === 403) {
+          throw new Error('Tài khoản đã bị khóa');
+        } else if (response.status >= 500) {
+          throw new Error('Lỗi máy chủ. Vui lòng thử lại sau');
+        } else {
+          // Use the error message from API response if available
+          const errorMessage = data?.message || data?.error || 'Đăng nhập thất bại';
+          throw new Error(errorMessage);
+        }
+      }
+
+      // Check if the response data indicates success
+      if (!data.success) {
+        const errorMessage = data.message || data.error || 'Đăng nhập thất bại';
+        throw new Error(errorMessage);
       }
 
       // Store token and user data
@@ -74,7 +102,8 @@ export class ApiService {
 
       return data;
     } catch (error) {
-      console.error('Login error:', error);
+      // Don't log to console.error to avoid Next.js error overlay
+      console.log('Login error:', error);
       throw error;
     }
   }
