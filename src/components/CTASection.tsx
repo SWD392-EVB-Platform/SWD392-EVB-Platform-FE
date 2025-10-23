@@ -19,6 +19,5 @@ const CTASection: React.FC = () => {
       </div>
     </div>
   );
-};
-
+}; 
 export default CTASection;
