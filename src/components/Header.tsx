@@ -5,16 +5,21 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import UserDropdown from './UserDropdown';
 import ClientOnly from './ClientOnly';
+import { usePathname } from 'next/navigation';
 
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isAuthenticated, isLoading, user } = useAuth();
+
+  const pathname = usePathname();
+  if (pathname && pathname.startsWith('/admin')) return null;
 
   console.log('Header: isAuthenticated:', isAuthenticated, 'isLoading:', isLoading, 'user:', user);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+  const isAdmin = !!user && typeof user.role === 'string' && user.role.toLowerCase() === 'admin';
 
   return (
     <header className="bg-black shadow-lg">
@@ -41,6 +46,16 @@ const Header: React.FC = () => {
           <Link href="/contact" className="text-white hover:text-yellow-400 transition-colors duration-200 font-medium">
             Contact
           </Link>
+          {isAdmin && (
+            <>
+              <Link href="/admin/users" className="text-white hover:text-yellow-400 transition-colors duration-200 font-medium">
+                Quản lý người dùng
+              </Link>
+              <Link href="/admin/posts" className="text-white hover:text-yellow-400 transition-colors duration-200 font-medium">
+                Quản lý tin đăng
+              </Link>
+            </>
+          )}
         </nav>
 
         {/* Auth Buttons or User Dropdown */}
@@ -101,6 +116,16 @@ const Header: React.FC = () => {
             <Link href="/contact" className="block text-white hover:text-yellow-400 transition-colors duration-200 py-1 font-medium">
               Contact
             </Link>
+            {isAdmin && (
+              <>
+                <Link href="/admin/users" className="block text-white hover:text-yellow-400 transition-colors duration-200 py-1 font-medium">
+                  Quản lý người dùng
+                </Link>
+                <Link href="/admin/posts" className="block text-white hover:text-yellow-400 transition-colors duration-200 py-1 font-medium">
+                  Quản lý tin đăng
+                </Link>
+              </>
+            )}
             <div className="border-t border-gray-700 my-2"></div>
             <ClientOnly fallback={
               <>
