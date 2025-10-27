@@ -41,7 +41,7 @@ const AdminUsersPage: React.FC = () => {
 	return (
 		<div className='w-full max-w-full'>
 			<div className="flex items-center justify-between mb-6">
-				<h1 className="text-2xl font-semibold">Quản lý người dùng (Mock)</h1>
+				<h1 className="text-2xl font-semibold">UserManagement (Mock)</h1>
 				<Link href="/admin" className="text-sm text-gray-600">Back to admin</Link>
 			</div>
 
