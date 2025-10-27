@@ -25,43 +25,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const getIcon = (iconName: string) => {
     const icons: Record<string, string> = {
-      DashboardIcon: `
-        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-      `,
-      UsersIcon: `
-        <path d="M12 4.354a4 4 0 110 5.292M15 21H9a4 4 0 01-4-4v-1m10 0v1a4 4 0 01-4 4m4-4v1m-4-5a4 4 0 110-8 4 4 0 010 8z" />
-      `,
-      DocumentTextIcon: `
-        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      `,
-      CurrencyDollarIcon: `
-        <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-      `,
-      CreditCardIcon: `
-        <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-      `,
-      ChartBarIcon: `
-        <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      `,
+      DashboardIcon: `<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />`,
+      UsersIcon: `<path d="M12 4.354a4 4 0 110 5.292M15 21H9a4 4 0 01-4-4v-1m10 0v1a4 4 0 01-4 4m4-4v1m-4-5a4 4 0 110-8 4 4 0 010 8z" />`,
+      DocumentTextIcon: `<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />`,
+      CurrencyDollarIcon: `<path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />`,
+      CreditCardIcon: `<path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />`,
+      ChartBarIcon: `<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />`,
     };
     return icons[iconName] || '';
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar - Desktop */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-black text-white transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      {/* Sidebar */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-black text-white transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <div className="flex items-center justify-between p-4 border-b border-gray-800">
           <h1 className="text-xl font-bold">EVB Admin</h1>
           <button
             onClick={() => setSidebarOpen(false)}
             className="md:hidden text-white hover:text-yellow-400"
           >
-            Close
+            ✕
           </button>
         </div>
         <nav className="mt-6">
-          {menuItems.map(item => (
+          {menuItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -72,7 +64,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               }`}
               onClick={() => setSidebarOpen(false)}
             >
-              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: getIcon(item.icon) }} />
+              <svg
+                className="w-5 h-5 mr-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                dangerouslySetInnerHTML={{ __html: getIcon(item.icon) }}
+              />
               {item.label}
             </Link>
           ))}
@@ -81,20 +79,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Top Navbar */}
+        {/* Header */}
         <header className="bg-black text-white shadow-md z-40">
-          <div className="px-4 py-3 flex justify-between items-center">
+          <div className="px-6 py-3 flex justify-between items-center">
+            {/* Nút mở sidebar trên mobile */}
             <button
               onClick={() => setSidebarOpen(true)}
               className="md:hidden text-white hover:text-yellow-400"
             >
-              Menu
+              ☰
             </button>
 
-            <div className="flex-1 md:hidden" />
-
-            {/* Profile Dropdown */}
-            <div className="relative">
+            {/* Phần profile căn phải */}
+            <div className="relative ml-auto">
               <button
                 onClick={() => setShowProfile(!showProfile)}
                 className="flex items-center space-x-2 hover:bg-gray-900 px-3 py-2 rounded-lg transition"
@@ -138,9 +135,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6 pb-20 md:pb-6 overflow-y-auto">
-          {children}
-        </main>
+        <main className="flex-1 p-6 pb-20 md:pb-6 overflow-y-auto">{children}</main>
 
         {/* Floating Action Button */}
         <button className="fixed bottom-20 right-6 bg-black text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:bg-gray-900 transition transform hover:scale-110 z-30">
