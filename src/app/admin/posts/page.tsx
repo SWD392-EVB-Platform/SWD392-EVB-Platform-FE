@@ -120,10 +120,36 @@ const AdminPostsPage: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.verified ? 'Có' : 'Không'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(p.createdAt).toLocaleDateString()}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    {p.status === 'pending' && <button onClick={() => approvePost(p.id)} className="text-green-600 hover:text-green-900">Duyệt</button>}
-                    {p.status !== 'spam' && <button onClick={() => markSpam(p.id)} className="text-red-600 hover:text-red-900">Spam</button>}
-                    {!p.verified && <button onClick={() => verifyPost(p.id)} className="text-blue-600 hover:text-blue-900">Kiểm định</button>}
-                    <button onClick={() => deletePost(p.id)} className="text-gray-600 hover:text-gray-900">Xóa</button>
+                    {p.status === 'pending' && (
+                      <button
+                        onClick={() => approvePost(p.id)}
+                        className="bg-green-100 text-green-800 hover:bg-green-200 border border-green-300 rounded px-3 py-1 transition-colors"
+                      >
+                        Duyệt
+                      </button>
+                    )}
+                    {p.status !== 'spam' && (
+                      <button
+                        onClick={() => markSpam(p.id)}
+                        className="bg-red-100 text-red-800 hover:bg-red-200 border border-red-300 rounded px-3 py-1 transition-colors"
+                      >
+                        Spam
+                      </button>
+                    )}
+                    {!p.verified && (
+                      <button
+                        onClick={() => verifyPost(p.id)}
+                        className="bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-300 rounded px-3 py-1 transition-colors"
+                      >
+                        Kiểm định
+                      </button>
+                    )}
+                    <button
+                      onClick={() => deletePost(p.id)}
+                      className="bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300 rounded px-3 py-1 transition-colors"
+                    >
+                      Xóa
+                    </button>
                   </td>
                 </tr>
               ))}
