@@ -43,7 +43,7 @@ const AdminUsersPage: React.FC = () => {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">UserManagement</h1>
+        <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
       </div>
 
       {loading ? (
