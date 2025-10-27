@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { FiCheck, FiAlertTriangle, FiShield, FiTrash2 } from 'react-icons/fi';
 
 type PostStatus = 'pending' | 'published' | 'spam' | 'deleted';
 
@@ -123,32 +124,36 @@ const AdminPostsPage: React.FC = () => {
                     {p.status === 'pending' && (
                       <button
                         onClick={() => approvePost(p.id)}
-                        className="bg-green-100 text-green-800 hover:bg-green-200 border border-green-300 rounded px-3 py-1 transition-colors"
+                        className="bg-green-100 text-green-800 hover:bg-green-200 border border-green-300 rounded p-2 transition-colors"
+                        title="Duyệt"
                       >
-                        Duyệt
+                        <FiCheck className="w-5 h-5" />
                       </button>
                     )}
                     {p.status !== 'spam' && (
                       <button
                         onClick={() => markSpam(p.id)}
-                        className="bg-red-100 text-red-800 hover:bg-red-200 border border-red-300 rounded px-3 py-1 transition-colors"
+                        className="bg-red-100 text-red-800 hover:bg-red-200 border border-red-300 rounded p-2 transition-colors"
+                        title="Spam"
                       >
-                        Spam
+                        <FiAlertTriangle className="w-5 h-5" />
                       </button>
                     )}
                     {!p.verified && (
                       <button
                         onClick={() => verifyPost(p.id)}
-                        className="bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-300 rounded px-3 py-1 transition-colors"
+                        className="bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-300 rounded p-2 transition-colors"
+                        title="Kiểm định"
                       >
-                        Kiểm định
+                        <FiShield className="w-5 h-5" />
                       </button>
                     )}
                     <button
                       onClick={() => deletePost(p.id)}
-                      className="bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300 rounded px-3 py-1 transition-colors"
+                      className="bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300 rounded p-2 transition-colors"
+                      title="Xóa"
                     >
-                      Xóa
+                      <FiTrash2 className="w-5 h-5" />
                     </button>
                   </td>
                 </tr>

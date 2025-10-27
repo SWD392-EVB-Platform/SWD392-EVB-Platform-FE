@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { FiCheck, FiLock, FiUnlock } from 'react-icons/fi';
 
 type UserStatus = 'pending' | 'active' | 'locked';
 
@@ -81,17 +82,23 @@ const AdminUsersPage: React.FC = () => {
                     {u.status === 'pending' && (
                       <button
                         onClick={() => approveUser(u.id)}
-                        className="bg-green-100 text-green-800 hover:bg-green-200 border border-green-300 rounded px-3 py-1 transition-colors"
+                        className="bg-green-100 text-green-800 hover:bg-green-200 border border-green-300 rounded p-2 transition-colors"
+                        title="Phê duyệt"
                       >
-                        Phê duyệt
+                        <FiCheck className="w-5 h-5" />
                       </button>
                     )}
                     {u.role !== 'admin' && (
                       <button
                         onClick={() => toggleLock(u.id)}
-                        className={`border rounded px-3 py-1 transition-colors ${u.status === 'locked' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-300' : 'bg-red-100 text-red-800 hover:bg-red-200 border-red-300'}`}
+                        className={`border rounded p-2 transition-colors ${u.status === 'locked' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-300' : 'bg-red-100 text-red-800 hover:bg-red-200 border-red-300'}`}
+                        title={u.status === 'locked' ? 'Mở khóa' : 'Khóa'}
                       >
-                        {u.status === 'locked' ? 'Mở khóa' : 'Khóa'}
+                        {u.status === 'locked' ? (
+                          <FiUnlock className="w-5 h-5" />
+                        ) : (
+                          <FiLock className="w-5 h-5" />
+                        )}
                       </button>
                     )}
                   </td>

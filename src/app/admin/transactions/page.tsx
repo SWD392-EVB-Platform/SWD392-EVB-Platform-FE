@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { FiCheckCircle } from 'react-icons/fi';
 
 type TransactionStatus = 'pending' | 'completed' | 'disputed' | 'resolved';
 
@@ -40,7 +41,7 @@ const AdminTransactionsPage: React.FC = () => {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">TransactionManagement</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Transaction Management</h1>
       </div>
 
       {loading ? (
@@ -82,9 +83,10 @@ const AdminTransactionsPage: React.FC = () => {
                     {t.status === 'disputed' && (
                       <button
                         onClick={() => resolveDispute(t.id)}
-                        className="bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-300 rounded px-3 py-1 transition-colors"
+                        className="bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-300 rounded p-2 transition-colors"
+                        title="Xử lý khiếu nại"
                       >
-                        Xử lý khiếu nại
+                        <FiCheckCircle className="w-5 h-5" />
                       </button>
                     )}
                   </td>
