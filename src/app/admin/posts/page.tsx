@@ -71,18 +71,20 @@ const AdminPostsPage: React.FC = () => {
         <h1 className="text-2xl font-bold text-gray-800">Post Management</h1>
       </div>
 
-      <div className="mb-4 flex space-x-2 overflow-x-auto">
-        {FILTERS.map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
-              filter === f ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            {f === 'all' ? 'Tất cả' : f === 'verified' ? 'Đã kiểm định' : f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
+      <div className="mb-4 flex items-center space-x-2">
+        <span className="text-sm font-medium text-gray-700 mr-2">Status:</span>
+        <select
+          id="filter"
+          value={filter}
+          onChange={e => setFilter(e.target.value as typeof FILTERS[number])}
+          className="px-4 py-2 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+        >
+          {FILTERS.map(f => (
+            <option key={f} value={f}>
+              {f === 'all' ? 'All' : f === 'verified' ? 'Tested' : f.charAt(0).toUpperCase() + f.slice(1)}
+            </option>
+          ))}
+        </select>
       </div>
 
       {loading ? (
