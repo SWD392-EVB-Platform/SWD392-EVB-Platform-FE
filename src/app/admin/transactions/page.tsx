@@ -40,7 +40,7 @@ const AdminTransactionsPage: React.FC = () => {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Quản lý Giao dịch</h1>
+        <h1 className="text-2xl font-bold text-gray-800">TransactionManagement</h1>
       </div>
 
       {loading ? (
@@ -80,7 +80,12 @@ const AdminTransactionsPage: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(t.createdAt).toLocaleDateString()}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     {t.status === 'disputed' && (
-                      <button onClick={() => resolveDispute(t.id)} className="text-blue-600 hover:text-blue-900">Xử lý khiếu nại</button>
+                      <button
+                        onClick={() => resolveDispute(t.id)}
+                        className="bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-300 rounded px-3 py-1 transition-colors"
+                      >
+                        Xử lý khiếu nại
+                      </button>
                     )}
                   </td>
                 </tr>
