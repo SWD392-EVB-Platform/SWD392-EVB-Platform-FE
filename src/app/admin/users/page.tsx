@@ -43,7 +43,7 @@ const AdminUsersPage: React.FC = () => {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Quản lý Người dùng</h1>
+        <h1 className="text-2xl font-bold text-gray-800">UserManagement</h1>
       </div>
 
       {loading ? (
@@ -79,10 +79,18 @@ const AdminUsersPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     {u.status === 'pending' && (
-                      <button onClick={() => approveUser(u.id)} className="text-green-600 hover:text-green-900">Phê duyệt</button>
+                      <button
+                        onClick={() => approveUser(u.id)}
+                        className="bg-green-100 text-green-800 hover:bg-green-200 border border-green-300 rounded px-3 py-1 transition-colors"
+                      >
+                        Phê duyệt
+                      </button>
                     )}
                     {u.role !== 'admin' && (
-                      <button onClick={() => toggleLock(u.id)} className="text-red-600 hover:text-red-900">
+                      <button
+                        onClick={() => toggleLock(u.id)}
+                        className={`border rounded px-3 py-1 transition-colors ${u.status === 'locked' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-300' : 'bg-red-100 text-red-800 hover:bg-red-200 border-red-300'}`}
+                      >
                         {u.status === 'locked' ? 'Mở khóa' : 'Khóa'}
                       </button>
                     )}

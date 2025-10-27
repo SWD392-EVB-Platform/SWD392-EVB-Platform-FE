@@ -79,66 +79,61 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="bg-black text-white shadow-md z-40">
-          <div className="px-6 py-3 flex justify-between items-center">
-            {/* Nút mở sidebar trên mobile */}
+        {/* Profile top right */}
+        <div className="flex justify-end items-center px-6 pt-6">
+          <div className="relative">
             <button
-              onClick={() => setSidebarOpen(true)}
-              className="md:hidden text-white hover:text-yellow-400"
+              onClick={() => setShowProfile(!showProfile)}
+              className="flex items-center space-x-2 hover:bg-gray-300 px-3 py-2 rounded-lg transition"
             >
-              ☰
-            </button>
-
-            {/* Phần profile căn phải */}
-            <div className="relative ml-auto">
-              <button
-                onClick={() => setShowProfile(!showProfile)}
-                className="flex items-center space-x-2 hover:bg-gray-900 px-3 py-2 rounded-lg transition"
+              <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-black font-bold">
+                {user.name?.charAt(0) || 'A'}
+              </div>
+              <div className="hidden md:block text-sm font-semibold">{user.name || 'Admin'}</div>
+              <svg
+                className={`w-4 h-4 transition-transform ${showProfile ? 'transform rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-black font-bold">
-                  {user.name?.charAt(0) || 'A'}
-                </div>
-                <span className="hidden md:block text-sm">{user.name || 'Admin'}</span>
-              </button>
-
-              {showProfile && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
-                  <div className="p-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center text-xl font-bold">
-                        {user.name?.charAt(0) || 'A'}
-                      </div>
-                      <div>
-                        <p className="font-semibold">{user.name || 'Admin'}</p>
-                        <p className="text-xs opacity-90">{user.email}</p>
-                      </div>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+            {showProfile && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+                <div className="p-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center text-xl font-bold">
+                      {user.name?.charAt(0) || 'A'}
+                    </div>
+                    <div>
+                      <p className="font-semibold">{user.name || 'Admin'}</p>
+                      <p className="text-xs opacity-90">{user.email}</p>
                     </div>
                   </div>
-                  <div className="p-3">
-                    <p className="text-xs text-gray-500 mb-2">
-                      <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
-                        {user.role?.toUpperCase()}
-                      </span>
-                    </p>
-                    <button
-                      onClick={logout}
-                      className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
-                    >
-                      Đăng xuất
-                    </button>
-                  </div>
                 </div>
-              )}
-            </div>
+                <div className="p-3">
+                  <p className="text-xs text-gray-500 mb-2">
+                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
+                      {user.role?.toUpperCase()}
+                    </span>
+                  </p>
+                  <button
+                    onClick={logout}
+                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
+                  >
+                    Đăng xuất
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-        </header>
-
+        </div>
         {/* Page Content */}
         <main className="flex-1 p-6 pb-20 md:pb-6 overflow-y-auto">{children}</main>
 
         {/* Floating Action Button */}
-        <button className="fixed bottom-20 right-6 bg-black text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:bg-gray-900 transition transform hover:scale-110 z-30">
+        <button className="fixed bottom-20 right-6 bg-black text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:bg-gray-100 transition transform hover:scale-110 z-30">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>

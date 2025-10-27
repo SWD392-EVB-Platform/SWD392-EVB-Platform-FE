@@ -67,7 +67,7 @@ const AdminPostsPage: React.FC = () => {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Quản lý Tin đăng</h1>
+        <h1 className="text-2xl font-bold text-gray-800">PostManagement</h1>
       </div>
 
       <div className="mb-4 flex space-x-2 overflow-x-auto">
