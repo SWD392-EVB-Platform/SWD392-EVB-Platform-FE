@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import LoginForm from '@/components/LoginForm';
+import { LoginForm } from '@/components';
 
 const LoginPage: React.FC = () => {
   return (

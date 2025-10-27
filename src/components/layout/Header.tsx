@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import UserDropdown from './UserDropdown';
-import ClientOnly from './ClientOnly';
+import { UserDropdown } from '@/components/auth';
+import { ClientOnly } from '@/components/ui';
 
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

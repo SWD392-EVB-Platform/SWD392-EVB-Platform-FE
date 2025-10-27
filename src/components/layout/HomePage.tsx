@@ -1,8 +1,7 @@
 import React from 'react';
-import HeroSection from './HeroSection';
-import FeaturesSection from './FeaturesSection';
-import StatsSection from './StatsSection';
-import CTASection from './CTASection';
+import { HeroSection, CTASection } from '@/components/features/hero';
+import { FeaturesSection } from '@/components/features/features';
+import { StatsSection } from '@/components/features/stats';
 
 const HomePage: React.FC = () => {
   return (

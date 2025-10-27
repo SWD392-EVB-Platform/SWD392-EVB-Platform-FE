@@ -1,4 +1,4 @@
-import PostListing from "@/components/EV&Battery/PostListing";
+import { PostListing } from "@/components";
 
 const PostListingPage: React.FC = () => {
   return <PostListing />;

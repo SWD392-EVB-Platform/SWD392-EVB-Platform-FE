@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import RegisterForm from '@/components/RegisterForm';
+import { RegisterForm } from '@/components';
 
 const RegisterPage: React.FC = () => {
   return (

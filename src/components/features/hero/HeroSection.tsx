@@ -7,7 +7,7 @@ const HeroSection: React.FC = () => {
         Welcome to EVB Platform
       </h1>
       <p className="text-xl text-gray-600 mb-8">
-        Vietnam's leading marketplace for electric vehicles and batteries
+        Vietnam&apos;s leading marketplace for electric vehicles and batteries
       </p>
       
       {/* Hero CTA */}
