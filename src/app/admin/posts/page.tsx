@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { FiCheck, FiAlertTriangle, FiShield, FiTrash2 } from 'react-icons/fi';
 
 type PostStatus = 'pending' | 'published' | 'spam' | 'deleted';
 
@@ -67,21 +68,23 @@ const AdminPostsPage: React.FC = () => {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Quản lý Tin đăng</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Post Management</h1>
       </div>
 
-      <div className="mb-4 flex space-x-2 overflow-x-auto">
-        {FILTERS.map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
-              filter === f ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            {f === 'all' ? 'Tất cả' : f === 'verified' ? 'Đã kiểm định' : f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
+      <div className="mb-4 flex items-center space-x-2">
+        <span className="text-sm font-medium text-gray-700 mr-2">Status:</span>
+        <select
+          id="filter"
+          value={filter}
+          onChange={e => setFilter(e.target.value as typeof FILTERS[number])}
+          className="px-4 py-2 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+        >
+          {FILTERS.map(f => (
+            <option key={f} value={f}>
+              {f === 'all' ? 'All' : f === 'verified' ? 'Tested' : f.charAt(0).toUpperCase() + f.slice(1)}
+            </option>
+          ))}
+        </select>
       </div>
 
       {loading ? (
@@ -123,32 +126,36 @@ const AdminPostsPage: React.FC = () => {
                     {p.status === 'pending' && (
                       <button
                         onClick={() => approvePost(p.id)}
-                        className="bg-green-100 text-green-800 hover:bg-green-200 border border-green-300 rounded px-3 py-1 transition-colors"
+                        className="bg-green-100 text-green-800 hover:bg-green-200 border border-green-300 rounded p-2 transition-colors"
+                        title="Duyệt"
                       >
-                        Duyệt
+                        <FiCheck className="w-5 h-5" />
                       </button>
                     )}
                     {p.status !== 'spam' && (
                       <button
                         onClick={() => markSpam(p.id)}
-                        className="bg-red-100 text-red-800 hover:bg-red-200 border border-red-300 rounded px-3 py-1 transition-colors"
+                        className="bg-red-100 text-red-800 hover:bg-red-200 border border-red-300 rounded p-2 transition-colors"
+                        title="Spam"
                       >
-                        Spam
+                        <FiAlertTriangle className="w-5 h-5" />
                       </button>
                     )}
                     {!p.verified && (
                       <button
                         onClick={() => verifyPost(p.id)}
-                        className="bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-300 rounded px-3 py-1 transition-colors"
+                        className="bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-300 rounded p-2 transition-colors"
+                        title="Kiểm định"
                       >
-                        Kiểm định
+                        <FiShield className="w-5 h-5" />
                       </button>
                     )}
                     <button
                       onClick={() => deletePost(p.id)}
-                      className="bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300 rounded px-3 py-1 transition-colors"
+                      className="bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300 rounded p-2 transition-colors"
+                      title="Xóa"
                     >
-                      Xóa
+                      <FiTrash2 className="w-5 h-5" />
                     </button>
                   </td>
                 </tr>
