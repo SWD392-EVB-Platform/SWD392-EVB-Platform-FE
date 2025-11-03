@@ -4,28 +4,52 @@ Nền tảng giao dịch xe điện và pin xe điện hàng đầu Việt Nam.
 
 ## Cấu trúc dự án
 
+### Cấu trúc hiện tại (đang refactoring)
 ```
 src/
-├── app/
-│   ├── globals.css          # CSS toàn cục với theme đen-trắng-vàng và glass effect
-│   ├── layout.tsx           # Layout chính với Header, Main, Footer
-│   ├── page.tsx             # Trang chủ sử dụng HomePage component
-│   ├── login/
-│   │   └── page.tsx         # Trang đăng nhập với glass effect
-│   └── dashboard/
-│       └── page.tsx         # Trang dashboard sau khi đăng nhập
-├── components/
-│   ├── Header.tsx           # Header với background đen, hover vàng
-│   ├── Footer.tsx           # Footer component
-│   ├── HomePage.tsx         # Trang chủ chính
-│   ├── HeroSection.tsx      # Section hero với CTA
-│   ├── FeaturesSection.tsx  # Section tính năng chính
-│   ├── StatsSection.tsx     # Section thống kê
-│   ├── CTASection.tsx       # Section call-to-action
-│   └── LoginForm.tsx        # Form đăng nhập với validation
-└── lib/
-    └── api.ts               # API service cho authentication
+├── app/                     # Next.js App Router pages
+│   ├── admin/              # Admin dashboard pages
+│   ├── dashboard/          # User dashboard
+│   ├── login/              # Authentication pages
+│   ├── register/
+│   ├── profile/
+│   └── post-listing/
+├── components/              # TẤT CẢ components (cần tổ chức lại)
+├── contexts/               # React contexts (AuthContext)
+├── hooks/                  # Custom hooks
+└── lib/                    # Utilities & APIs
+    └── api.ts              # API service (tất cả API calls)
 ```
+
+### Cấu trúc mới (đang triển khai)
+```
+src/
+├── features/               # Tổ chức theo feature
+│   ├── auth/              # Authentication feature
+│   │   ├── components/
+│   │   ├── services/
+│   │   └── contexts/
+│   ├── posts/             # Posts feature
+│   │   ├── components/
+│   │   └── services/
+│   └── admin/             # Admin feature
+│       ├── components/
+│       └── services/
+├── shared/                 # Code dùng chung
+│   ├── components/        # UI components
+│   ├── types/             # TypeScript types
+│   ├── constants/         # Constants & configs
+│   ├── utils/             # Utilities
+│   └── hooks/             # Shared hooks
+└── app/                   # Next.js App Router (giữ nguyên)
+```
+
+## Cấu trúc mới đã được thiết lập
+
+✅ **Đã hoàn thành**:
+- Cấu trúc thư mục `features/` và `shared/` 
+- Types, constants, services riêng biệt theo feature
+- Sẵn sàng để migrate components
 
 ## Màu sắc chính
 
@@ -49,10 +73,12 @@ src/
 
 ## Công nghệ sử dụng
 
-- Next.js 14
-- TypeScript
-- Tailwind CSS
-- React 18
+- **Next.js** 15.5.5 (App Router)
+- **React** 19.2.0
+- **TypeScript** 5.x
+- **Tailwind CSS** 4.1.14
+- **Chart.js** 4.5.1 (Admin dashboard)
+- **React Icons** 5.5.0
 
 ## Chạy dự án
 
