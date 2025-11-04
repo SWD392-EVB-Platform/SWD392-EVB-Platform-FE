@@ -1,115 +1,117 @@
 // app/admin/users/page.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { FiCheck, FiLock, FiUnlock } from 'react-icons/fi';
+import { Filter, MoreVertical, Search, UserCheck, UserX } from 'lucide-react';
 
-type UserStatus = 'pending' | 'active' | 'locked';
-
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  status: UserStatus;
-};
-
-const MOCK_USERS: User[] = [
-  { id: 1, name: 'Nguyen Van A', email: 'a@example.com', role: 'user', status: 'pending' },
-  { id: 2, name: 'Tran Thi B', email: 'b@example.com', role: 'user', status: 'active' },
-  { id: 3, name: 'Admin User', email: 'admin@example.com', role: 'admin', status: 'active' },
-  { id: 4, name: 'Le Van C', email: 'c@example.com', role: 'user', status: 'locked' },
+const mockUsers = [
+  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'buyer', status: 'active', joined: '2025-01-15', listings: 5, revenue: '$1,200' },
+  { id: 2, name: 'Anna Smith', email: 'anna@example.com', role: 'seller', status: 'active', joined: '2025-02-20', listings: 12, revenue: '$8,500' },
+  { id: 3, name: 'Mike Lee', email: 'mike@example.com', role: 'buyer', status: 'banned', joined: '2025-03-10', listings: 0, revenue: '$0' },
+  { id: 4, name: 'Sarah Kim', email: 'sarah@example.com', role: 'premium', status: 'active', joined: '2025-01-05', listings: 89, revenue: '$45,000' },
+  { id: 5, name: 'Tom Brown', email: 'tom@example.com', role: 'moderator', status: 'active', joined: '2024-12-01', listings: 156, revenue: '$0' },
 ];
 
-const AdminUsersPage: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate API fetch
-    setTimeout(() => {
-      setUsers(MOCK_USERS);
-      setLoading(false);
-    }, 400);
-  }, []);
-
-  const approveUser = (id: number) => {
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, status: 'active' } : u));
-  };
-
-  const toggleLock = (id: number) => {
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, status: u.status === 'locked' ? 'active' : 'locked' } : u));
-  };
-
+export default function UsersPage() {
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="backdrop-blur-xl bg-white/70 rounded-3xl p-6 shadow-lg border border-white/20">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
+            <p className="text-gray-600 mt-1">
+              Total: <strong>12,345</strong> active users
+            </p>
+          </div>
+          <button className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all">
+            + Add User
+          </button>
+        </div>
       </div>
 
-      {loading ? (
-        <div className="text-center py-8">Đang tải...</div>
-      ) : (
-        <div className="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+      {/* Search & Filter */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search by name, email, ID..."
+            className="w-full pl-10 pr-4 py-3 rounded-xl backdrop-blur-sm bg-white/50 border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <button className="px-4 py-3 bg-white/50 backdrop-blur-sm rounded-xl border border-white/30 flex items-center gap-2 hover:bg-white/70 transition">
+          <Filter className="w-4 h-4" /> Filter
+        </button>
+      </div>
+
+      {/* Table */}
+      <div className="backdrop-blur-xl bg-white/60 rounded-3xl shadow-xl border border-white/20 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-white/20">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">User</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Role</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Listings</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Revenue</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"></th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {users.map(u => (
-                <tr key={u.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{u.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{u.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{u.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{u.role}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      u.status === 'active' ? 'bg-green-100 text-green-800' :
-                      u.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {u.status}
+            <tbody className="divide-y divide-white/10">
+              {mockUsers.map((u) => (
+                <tr key={u.id} className="hover:bg-white/40 transition-all duration-200">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <div className="w-11 h-11 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-black font-bold text-sm shadow-md">
+                          {u.name.charAt(0)}
+                        </div>
+                        <div className="absolute -inset-1 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full blur-md opacity-60" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">{u.name}</p>
+                        <p className="text-xs text-gray-500">{u.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        u.role === 'premium'
+                          ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black'
+                          : u.role === 'moderator'
+                          ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white'
+                          : 'bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      {u.role}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    {u.status === 'pending' && (
-                      <button
-                        onClick={() => approveUser(u.id)}
-                        className="bg-green-100 text-green-800 hover:bg-green-200 border border-green-300 rounded p-2 transition-colors"
-                        title="Phê duyệt"
-                      >
-                        <FiCheck className="w-5 h-5" />
-                      </button>
+                  <td className="px-6 py-4">
+                    {u.status === 'active' ? (
+                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium flex items-center gap-1 w-fit">
+                        <UserCheck className="w-3 h-3" /> Active
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium flex items-center gap-1 w-fit">
+                        <UserX className="w-3 h-3" /> Banned
+                      </span>
                     )}
-                    {u.role !== 'admin' && (
-                      <button
-                        onClick={() => toggleLock(u.id)}
-                        className={`border rounded p-2 transition-colors ${u.status === 'locked' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-300' : 'bg-red-100 text-red-800 hover:bg-red-200 border-red-300'}`}
-                        title={u.status === 'locked' ? 'Mở khóa' : 'Khóa'}
-                      >
-                        {u.status === 'locked' ? (
-                          <FiUnlock className="w-5 h-5" />
-                        ) : (
-                          <FiLock className="w-5 h-5" />
-                        )}
-                      </button>
-                    )}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700 font-medium">{u.listings}</td>
+                  <td className="px-6 py-4 text-sm font-semibold text-green-600">{u.revenue}</td>
+                  <td className="px-6 py-4">
+                    <button className="p-2 hover:bg-white/50 rounded-xl transition">
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      )}
+      </div>
     </div>
   );
-};
-
-export default AdminUsersPage;
+}

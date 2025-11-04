@@ -36,31 +36,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
+      {/* Sidebar - Gradient + Bo tròn góc phải */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-black text-white transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-blue-900 to-blue-700 text-white transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        } rounded-r-3xl shadow-2xl overflow-hidden`}
       >
-        <div className="flex items-center justify-between p-4 border-b border-gray-800">
-          <h1 className="text-xl font-bold">EVB Admin</h1>
+        <div className="flex items-center justify-between p-5 border-b border-blue-800">
+          <h1 className="text-2xl font-bold tracking-tight">EVB Admin</h1>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="md:hidden text-white hover:text-yellow-400"
+            className="md:hidden text-white hover:text-yellow-300 transition"
           >
-            ✕
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
-        <nav className="mt-6">
+        <nav className="mt-6 px-3">
           {menuItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center px-6 py-3 text-sm font-medium transition-colors ${
+              className={`flex items-center px-4 py-3 mb-1 text-sm font-medium rounded-xl transition-all duration-200 ${
                 pathname === item.href
-                  ? 'bg-yellow-400 text-black'
-                  : 'text-gray-300 hover:bg-gray-900 hover:text-white'
+                  ? 'bg-yellow-400 text-black shadow-md'
+                  : 'text-blue-100 hover:bg-blue-800 hover:text-white hover:shadow-sm'
               }`}
               onClick={() => setSidebarOpen(false)}
             >
@@ -79,48 +81,51 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Profile top right */}
+        {/* Profile Dropdown - Bo tròn + Shadow đẹp */}
         <div className="flex justify-end items-center px-6 pt-6">
           <div className="relative">
             <button
               onClick={() => setShowProfile(!showProfile)}
-              className="flex items-center space-x-2 hover:bg-gray-300 px-3 py-2 rounded-lg transition"
+              className="flex items-center space-x-3 hover:bg-white/70 px-4 py-2 rounded-2xl transition-all duration-200 shadow-sm bg-white/50 backdrop-blur-sm"
             >
-              <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-black font-bold">
-                {user.name?.charAt(0) || 'A'}
+              <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-black font-bold text-lg shadow-inner">
+                {user.name?.charAt(0).toUpperCase() || 'A'}
               </div>
-              <div className="hidden md:block text-sm font-semibold">{user.name || 'Admin'}</div>
+              <div className="hidden md:block text-sm font-semibold text-gray-800">{user.name || 'Admin'}</div>
               <svg
-                className={`w-4 h-4 transition-transform ${showProfile ? 'transform rotate-180' : ''}`}
+                className={`w-4 h-4 text-gray-600 transition-transform ${showProfile ? 'transform rotate-180' : ''}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9l6 6 6-6" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
+
+            {/* Profile Card - Bo tròn góc + Gradient header */}
             {showProfile && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
-                <div className="p-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+              <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="p-5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-t-2xl">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center text-xl font-bold">
-                      {user.name?.charAt(0) || 'A'}
+                    <div className="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center text-2xl font-bold shadow-md">
+                      {user.name?.charAt(0).toUpperCase() || 'A'}
                     </div>
                     <div>
-                      <p className="font-semibold">{user.name || 'Admin'}</p>
-                      <p className="text-xs opacity-90">{user.email}</p>
+                      <p className="font-bold text-lg">{user.name || 'Admin'}</p>
+                      <p className="text-sm opacity-90">{user.email}</p>
                     </div>
                   </div>
                 </div>
-                <div className="p-3">
-                  <p className="text-xs text-gray-500 mb-2">
-                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
-                      {user.role?.toUpperCase()}
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">Vai trò</span>
+                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full font-semibold">
+                      {user.role?.toUpperCase() || 'ADMIN'}
                     </span>
-                  </p>
+                  </div>
                   <button
                     onClick={logout}
-                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
+                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 font-medium"
                   >
                     Đăng xuất
                   </button>
@@ -129,13 +134,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             )}
           </div>
         </div>
-        {/* Page Content */}
-        <main className="flex-1 p-6 pb-20 md:pb-6 overflow-y-auto">{children}</main>
 
-        {/* Floating Action Button */}
-        <button className="fixed bottom-20 right-6 bg-black text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:bg-gray-100 transition transform hover:scale-110 z-30">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        {/* Page Content */}
+        <main className="flex-1 p-6 pb-24 md:pb-8 overflow-y-auto">{children}</main>
+
+        {/* Floating Action Button - Bo tròn + Hiệu ứng */}
+        <button className="fixed bottom-20 right-6 md:bottom-8 md:right-8 bg-gradient-to-br from-black to-gray-900 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-2xl hover:shadow-yellow-400/50 transition-all duration-300 transform hover:scale-110 z-30 border border-white/10">
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
           </svg>
         </button>
       </div>
@@ -143,7 +149,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-60 z-40 md:hidden backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
       )}
