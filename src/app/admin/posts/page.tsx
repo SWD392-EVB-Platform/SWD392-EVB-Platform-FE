@@ -17,9 +17,9 @@ type Post = {
 };
 
 const MOCK_POSTS: Post[] = [
-  { id: 101, title: 'VinFast Klara 2019', type: 'xe', price: 15000000, status: 'pending', verified: false, createdAt: new Date().toISOString() },
+  { id: 101, title: 'VinFast Klara 2019', type: 'vehicle', price: 15000000, status: 'pending', verified: false, createdAt: new Date().toISOString() },
   { id: 102, title: 'Battery Pack 48V 20Ah', type: 'pin', price: 4500000, status: 'published', verified: true, createdAt: new Date(Date.now() - 86400000).toISOString() },
-  { id: 103, title: 'Used e-scooter', type: 'xe', price: 7000000, status: 'spam', verified: false, createdAt: new Date(Date.now() - 3600000).toISOString() },
+  { id: 103, title: 'Used e-scooter', type: 'vehicle', price: 7000000, status: 'spam', verified: false, createdAt: new Date(Date.now() - 3600000).toISOString() },
   { id: 104, title: 'New Battery 60V', type: 'pin', price: 6500000, status: 'pending', verified: false, createdAt: new Date(Date.now() - 7200000).toISOString() },
   { id: 105, title: 'Service Offer', type: 'other', price: 0, status: 'published', verified: false, createdAt: new Date(Date.now() - 172800000).toISOString() },
 ];
@@ -95,13 +95,13 @@ const AdminPostsPage: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiêu đề</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kiểm định</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tạo</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verify</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creation Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -120,7 +120,7 @@ const AdminPostsPage: React.FC = () => {
                       {p.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.verified ? 'Có' : 'Không'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.verified ? 'Yes' : 'No'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(p.createdAt).toLocaleDateString()}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     {p.status === 'pending' && (
