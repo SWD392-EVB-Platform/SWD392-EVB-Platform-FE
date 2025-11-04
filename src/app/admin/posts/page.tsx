@@ -17,7 +17,9 @@ export default function ListingsPage() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Listings Management</h1>
-            <p className="text-gray-600 mt-1">Total: <strong>8,421</strong> listings</p>
+            <p className="text-gray-600 mt-1">
+              Total: <strong>8,421</strong> listings
+            </p>
           </div>
           <button className="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all">
             + New Listing
@@ -38,6 +40,7 @@ export default function ListingsPage() {
                 </span>
               </div>
             )}
+
             <div className="h-48 bg-gradient-to-br from-purple-400 via-pink-400 to-red-400 relative overflow-hidden">
               <div className="absolute inset-0 bg-black/20" />
               <div className="absolute bottom-3 left-3">
@@ -46,22 +49,35 @@ export default function ListingsPage() {
                 </span>
               </div>
             </div>
+
             <div className="p-5 space-y-3">
               <h3 className="font-bold text-lg text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
                 {l.title}
               </h3>
-              <p className="text-sm text-gray-600">Seller: <strong>{l.seller}</strong></p>
+              <p className="text-sm text-gray-600">
+                Seller: <strong>{l.seller}</strong>
+              </p>
               <p className="text-xl font-bold text-green-600">{l.price}</p>
+
               <div className="flex items-center gap-4 text-xs text-gray-500">
-                <span className="flex items-center gap-1"><Eye className="w-4 h-4" /> {l.views.toLocaleString()}</span>
-                <span className="flex items-center gap-1"><ThumbsUp className="w-4 h-4" /> {l.likes}</span>
-                <span className="flex items-center gap-1"><MessageSquare className="w-4 h-4" /> {l.comments}</span>
+                <span className="flex items-center gap-1">
+                  <Eye className="w-4 h-4" /> {l.views.toLocaleString()}
+                </span>
+                <span className="flex items-center gap-1">
+                  <ThumbsUp className="w-4 h-4" /> {l.likes}
+                </span>
+                <span className="flex items-center gap-1">
+                  <MessageSquare className="w-4 h-4" /> {l.comments}
+                </span>
               </div>
+
               <div className="flex justify-between items-center pt-2">
                 <span className="text-xs text-gray-400 flex items-center gap-1">
                   <Clock className="w-3 h-3" /> {l.date}
                 </span>
-                <button className="text-sm text-blue-600 hover:underline">View Details</button>
+                <button className="text-sm text-blue-600 hover:underline">
+                  View Details
+                </button>
               </div>
             </div>
           </div>
