@@ -14,22 +14,26 @@ export interface RegisterRequest {
 }
 
 export interface User {
-  userId: number;
+  userId: string;
   name: string;
   email: string;
   phone: string;
   role: string;
+  avatarUrl: string | null;
   status: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface LoginResponse {
+export interface AuthResponse {
   success: boolean;
   message: string;
   data: {
-    accessToken: string;
-    expiresAtUtc: string;
+    token: {
+      accessToken: string;
+      accessTokenExpires: string;
+      refreshToken: string;
+    };
     user: User;
   };
 }
@@ -41,7 +45,7 @@ export interface ApiError {
 }
 
 export class ApiService {
-  private static getAuthHeaders(): HeadersInit {
+  static getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('accessToken');
     return {
       'Content-Type': 'application/json',
@@ -49,7 +53,11 @@ export class ApiService {
     };
   }
 
-  static async login(credentials: LoginRequest): Promise<LoginResponse> {
+  static getToken(): string | null {
+    return localStorage.getItem('accessToken');
+  }
+
+  static async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}/authentication/login`, {
         method: 'POST',
@@ -93,10 +101,11 @@ export class ApiService {
       }
 
       // Store token and user data
-      if (data.success && data.data?.accessToken) {
-        localStorage.setItem('accessToken', data.data.accessToken);
+      if (data.success && data.data?.token?.accessToken) {
+        localStorage.setItem('accessToken', data.data.token.accessToken);
+        localStorage.setItem('refreshToken', data.data.token.refreshToken);
         localStorage.setItem('user', JSON.stringify(data.data.user));
-        localStorage.setItem('tokenExpiry', data.data.expiresAtUtc);
+        localStorage.setItem('tokenExpiry', data.data.token.accessTokenExpires);
       }
 
       return data;
@@ -107,7 +116,7 @@ export class ApiService {
     }
   }
 
-  static async register(payload: RegisterRequest): Promise<LoginResponse> {
+  static async register(payload: RegisterRequest): Promise<AuthResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}/authentication/register`, {
         method: 'POST',
@@ -124,10 +133,11 @@ export class ApiService {
       }
 
       // Optionally auto-login after register if token is returned
-      if (data.success && data.data?.accessToken) {
-        localStorage.setItem('accessToken', data.data.accessToken);
+      if (data.success && data.data?.token?.accessToken) {
+        localStorage.setItem('accessToken', data.data.token.accessToken);
+        localStorage.setItem('refreshToken', data.data.token.refreshToken);
         localStorage.setItem('user', JSON.stringify(data.data.user));
-        localStorage.setItem('tokenExpiry', data.data.expiresAtUtc);
+        localStorage.setItem('tokenExpiry', data.data.token.accessTokenExpires);
       }
 
       return data;
@@ -138,7 +148,53 @@ export class ApiService {
   }
 
   static async logout(): Promise<void> {
+    try {
+      const token = localStorage.getItem('accessToken');
+      
+      if (!token) {
+        // No token found, just clear storage
+        this.clearAuthData();
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/authentication/logout`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        // No need to send refresh token in body if using Bearer token
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            // Successful logout
+            this.clearAuthData();
+            return;
+          }
+        }
+        
+        // If we get here, something went wrong with the API call
+        console.warn('Logout API returned error:', response.status, response.statusText);
+      } catch (error) {
+        // Network error or other API issues
+        console.warn('Failed to call logout API:', error);
+      }
+
+      // Always clear local data even if API call fails
+      this.clearAuthData();
+    } catch (error) {
+      // Catch any other errors and ensure we clear local data
+      console.error('Unexpected error during logout:', error);
+      this.clearAuthData();
+    }
+  }
+
+  private static clearAuthData(): void {
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     localStorage.removeItem('tokenExpiry');
   }
