@@ -1,390 +1,312 @@
 'use client';
 
-import React, { useState } from 'react';
-import { FiAlertCircle, FiCalendar, FiCheck, FiMapPin, FiTruck, FiUpload, FiX } from 'react-icons/fi';
+import { ApiService } from '@/lib/api';
+import { useEffect, useState } from 'react';
+import {
+  FiAlertCircle,
+  FiArrowRight,
+  FiBattery,
+  FiCheck,
+  FiRefreshCw,
+  FiTruck,
+} from 'react-icons/fi';
 
-interface FormData {
-  itemType: 'vehicle' | 'battery';
-  brand: string;
-  model: string;
-  year: string;
-  condition: 'excellent' | 'good' | 'fair';
-  mileage: string;
-  batteryCapacity: string;
-  price: string;
-  description: string;
-  location: string;
-  images: File[];
+import { BatteryService } from '@/features/batteries/services/batteryService';
+import ListingService from '@/features/listing/services/ListingService';
+import { VehicleService } from '@/features/vehicles/services/vehicleService';
+import type { User } from '@/lib/api';
+
+interface PostListingProps {
+  onSuccess?: () => void;
 }
 
-const PostListing: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
-    itemType: 'vehicle',
+export default function PostListing({ onSuccess }: PostListingProps) {
+  const [user, setUser] = useState<User | null>(null);
+  const [step, setStep] = useState<'choose' | 'create' | 'listing'>('choose');
+  const [itemType, setItemType] = useState<'vehicle' | 'battery'>('vehicle');
+  const [createdId, setCreatedId] = useState<string | null>(null);
+
+  const [vehicleForm, setVehicleForm] = useState({
     brand: '',
     model: '',
     year: '',
-    condition: 'good',
-    mileage: '',
-    batteryCapacity: '',
-    price: '',
+    odometerKm: '',
+  });
+
+  const [batteryForm, setBatteryForm] = useState({
+    brand: '',
+    model: '',
+    batteryCapacityKWh: '',
+    batteryHealthPct: '',
+    cycleCount: '',
+  });
+
+  const [listingForm, setListingForm] = useState({
+    title: '',
     description: '',
-    location: '',
-    images: [],
+    priceVnd: '',
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  useEffect(() => {
+    const currentUser = ApiService.getCurrentUser();
+    if (currentUser?.userId) {
+      setUser(currentUser);
+    } else {
+      setError('Vui lòng đăng nhập');
+    }
+  }, []);
+
+  const resetForms = () => {
+    setVehicleForm({ brand: '', model: '', year: '', odometerKm: '' });
+    setBatteryForm({
+      brand: '',
+      model: '',
+      batteryCapacityKWh: '',
+      batteryHealthPct: '',
+      cycleCount: '',
+    });
+    setListingForm({ title: '', description: '', priceVnd: '' });
+    setCreatedId(null);
+    setError(null);
+    setSuccess(false);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files ? Array.from(e.target.files).slice(0, 5) : [];
-    setFormData(prev => ({ ...prev, images: files }));
-  };
-
-  const removeImage = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (formData.images.length === 0) {
-      setError('Vui lòng tải lên ít nhất 1 hình ảnh');
+  const handleCreateItem = async () => {
+    if (!user?.userId) {
+      setError('Không tìm thấy người dùng');
       return;
+    }
+
+    const required = itemType === 'vehicle'
+      ? ['brand', 'model', 'year']
+      : ['brand', 'model', 'batteryCapacityKWh'];
+    const formData = itemType === 'vehicle' ? vehicleForm : batteryForm;
+
+    for (const field of required) {
+      if (!formData[field as keyof typeof formData]) {
+        setError(`Vui lòng nhập ${field === 'batteryCapacityKWh' ? 'dung lượng pin' : field}`);
+        return;
+      }
     }
 
     setLoading(true);
     setError(null);
-    setSuccess(false);
 
     try {
-      // Bước 1: Upload ảnh trước (giả sử có API riêng)
-      const imageUrls = await uploadImages(formData.images);
+      let result: any;
 
-      // Bước 2: Tạo listing
-      const payload = {
-        sellerId: '3fa85f64-5717-4562-b3fc-2c963f66afa6', // TODO: Lấy từ auth
-        vehicleId: formData.itemType === 'vehicle' ? '3fa85f64-5717-4562-b3fc-2c963f66afa6' : null,
-        batteryId: formData.itemType === 'battery' ? '3fa85f64-5717-4562-b3fc-2c963f66afa6' : null,
-        title: `${formData.brand} ${formData.model} ${formData.year}`,
-        description: `${formData.description}\n\nLocation: ${formData.location}\nMileage: ${formData.mileage} km\nBattery: ${formData.batteryCapacity} kWh`,
-        priceVnd: parseFloat(formData.price.replace(/[^0-9.-]+/g, '')),
-        status: 'pending',
-        // approvedBy: 0 → backend tự set
-      };
-
-      const response = await fetch('/api/listings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.message || 'Không thể đăng tin');
+      if (itemType === 'vehicle') {
+        result = await VehicleService.createVehicle({
+          ownerId: user.userId,
+          brand: vehicleForm.brand.trim(),
+          model: vehicleForm.model.trim(),
+          year: vehicleForm.year,
+          odometerKm: vehicleForm.odometerKm || '0',
+          status: 'active',
+        });
+      } else {
+        result = await BatteryService.createBattery({
+          ownerId: user.userId,
+          brand: batteryForm.brand.trim(),
+          model: batteryForm.model.trim(),
+          batteryCapacityKWh: batteryForm.batteryCapacityKWh,
+          batteryHealthPct: batteryForm.batteryHealthPct || '0',
+          cycleCount: batteryForm.cycleCount || '0',
+          status: 'active',
+        });
       }
 
-      const result = await response.json();
-      console.log('Listing created:', result);
+      // LẤY ID TỪ NHIỀU VỊ TRÍ
+      const id = result?.data?.id || result?.id || result?.vehicleId || result?.batteryId;
+      
+      console.log('[DEBUG] Create item response:', result);
+      console.log('[DEBUG] Extracted ID:', id);
 
-      setSuccess(true);
-      alert('Đăng tin thành công! Đang chờ duyệt.');
+      if (!id) {
+        throw new Error('Tạo thất bại: Không nhận được ID từ server');
+      }
 
-      // Reset form
-      setFormData({
-        itemType: 'vehicle',
-        brand: '',
-        model: '',
-        year: '',
-        condition: 'good',
-        mileage: '',
-        batteryCapacity: '',
-        price: '',
-        description: '',
-        location: '',
-        images: [],
-      });
+      setCreatedId(String(id));
+      setStep('listing');
     } catch (err: any) {
-      setError(err.message || 'Đã có lỗi xảy ra');
-      console.error(err);
+      console.error('Create item error:', err);
+      setError(err.message || 'Không thể tạo. Vui lòng thử lại');
     } finally {
       setLoading(false);
     }
   };
 
-  // Giả lập hàm upload ảnh (thay bằng API thật)
-  const uploadImages = async (files: File[]): Promise<string[]> => {
-    // TODO: Gọi API upload ảnh, ví dụ: POST /api/upload
-    // Trả về mảng URL
-    return files.map((_, i) => `/uploads/placeholder-${i + 1}.jpg`);
-  };
+  const handleCreateListing = async () => {
+  if (!user?.userId || !createdId) {
+    setError('Thiếu thông tin');
+    return;
+  }
 
-  return (
-    <div className="w-full min-h-screen">
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-blue-50 via-yellow-50 to-orange-50" />
-      <div className="fixed inset-0 -z-10 backdrop-blur-sm" />
+  if (!listingForm.title || !listingForm.description || !listingForm.priceVnd) {
+    setError('Vui lòng điền đầy đủ');
+    return;
+  }
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex items-center space-x-4 mb-10">
-          <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-xl backdrop-blur-md bg-white/30">
-            <FiTruck className="w-8 h-8 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Đăng Tin Bán</h1>
-            <p className="text-sm text-gray-600">Bán xe điện hoặc pin cũ nhanh chóng & an toàn</p>
-          </div>
-        </div>
+  setLoading(true);
+  setError(null);
 
-        {/* Thông báo */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center">
-            <FiAlertCircle className="w-5 h-5 mr-2" />
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl flex items-center">
-            <FiCheck className="w-5 h-5 mr-2" />
-            Đăng tin thành công! Tin đang chờ duyệt.
-          </div>
-        )}
+  try {
+    const price = parseFloat(listingForm.priceVnd.replace(/[^0-9.-]+/g, ''));
+    if (isNaN(price) || price <= 0) throw new Error('Giá phải lớn hơn 0');
 
-        <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 md:p-12 space-y-8">
-          {/* Item Type & Location */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="flex items-center text-sm font-bold text-gray-700 mb-3">
-                <FiTruck className="w-5 h-5 mr-2 text-blue-600" />
-                Loại tin
-              </label>
-              <select
-                name="itemType"
-                value={formData.itemType}
-                onChange={handleInputChange}
-                className="w-full px-5 py-4 bg-white/70 backdrop-blur-md border-2 border-gray-200 rounded-2xl text-base font-medium text-gray-800 focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 transition-all outline-none"
-                required
-              >
-                <option value="vehicle">Xe điện (EV)</option>
-                <option value="battery">Pin (Battery Pack)</option>
-              </select>
-            </div>
+    // Tạo payload sạch
+    const payload: any = {
+      sellerId: user.userId,
+      title: listingForm.title.trim(),
+      description: listingForm.description.trim(),
+      priceVnd: price,
+      status: 'active',
+    };
 
-            <div>
-              <label className="flex items-center text-sm font-bold text-gray-700 mb-3">
-                <FiMapPin className="w-5 h-5 mr-2 text-green-600" />
-                Vị trí
-              </label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                placeholder="VD: TP. Hồ Chí Minh"
-                className="w-full px-5 py-4 bg-white/70 backdrop-blur-md border-2 border-gray-200 rounded-2xl text-base font-medium text-gray-800 placeholder-gray-400 focus:border-green-400 focus:ring-4 focus:ring-green-400/20 transition-all outline-none"
-                required
-              />
-            </div>
-          </div>
+    // Chỉ thêm đúng ID
+    if (itemType === 'vehicle') {
+      payload.vehicleId = createdId;
+    } else {
+      payload.batteryId = createdId;
+    }
 
-          {/* Brand & Model */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="text-sm font-bold text-gray-700 mb-3 block">Hãng xe</label>
-              <input
-                type="text"
-                name="brand"
-                value={formData.brand}
-                onChange={handleInputChange}
-                placeholder="VD: Tesla"
-                className="w-full px-5 py-4 bg-white/70 backdrop-blur-md border-2 border-gray-200 rounded-2xl text-base font-medium text-gray-800 placeholder-gray-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-400/20 transition-all outline-none"
-                required
-              />
-            </div>
-            <div>
-              <label className="text-sm font-bold text-gray-700 mb-3 block">Dòng xe</label>
-              <input
-                type="text"
-                name="model"
-                value={formData.model}
-                onChange={handleInputChange}
-                placeholder="VD: Model 3"
-                className="w-full px-5 py-4 bg-white/70 backdrop-blur-md border-2 border-gray-200 rounded-2xl text-base font-medium text-gray-800 placeholder-gray-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-400/20 transition-all outline-none"
-                required
-              />
-            </div>
-          </div>
+    console.log('[DEBUG] Final payload:', payload);
 
-          {/* Year & Condition */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="flex items-center text-sm font-bold text-gray-700 mb-3">
-                <FiCalendar className="w-5 h-5 mr-2 text-orange-600" />
-                Năm sản xuất
-              </label>
-              <input
-                type="number"
-                name="year"
-                value={formData.year}
-                onChange={handleInputChange}
-                placeholder="2023"
-                min={2000}
-                max={new Date().getFullYear() + 1}
-                className="w-full px-5 py-4 bg-white/70 backdrop-blur-md border-2 border-gray-200 rounded-2xl text-base font-medium text-gray-800 placeholder-gray-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-400/20 transition-all outline-none"
-                required
-              />
-            </div>
+    const response = await ListingService.createListing(payload);
 
-            <div>
-              <label className="flex items-center text-sm font-bold text-gray-700 mb-3">
-                <svg className="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Tình trạng
-              </label>
-              <select
-                name="condition"
-                value={formData.condition}
-                onChange={handleInputChange}
-                className="w-full px-5 py-4 bg-white/70 backdrop-blur-md border-2 border-gray-200 rounded-2xl text-base font-medium text-gray-800 focus:border-teal-400 focus:ring-4 focus:ring-teal-400/20 transition-all outline-none"
-              >
-                <option value="excellent">Xuất sắc (95%+)</option>
-                <option value="good">Tốt (80–94%)</option>
-                <option value="fair">Khá (60–79%)</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Mileage & Battery */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="text-sm font-bold text-gray-700 mb-3 block">Số km đã đi</label>
-              <input
-                type="text"
-                name="mileage"
-                value={formData.mileage}
-                onChange={handleInputChange}
-                placeholder="VD: 25,000"
-                className="w-full px-5 py-4 bg-white/70 backdrop-blur-md border-2 border-gray-200 rounded-2xl text-base font-medium text-gray-800 placeholder-gray-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-400/20 transition-all outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-bold text-gray-700 mb-3 block">Dung lượng pin (kWh)</label>
-              <input
-                type="text"
-                name="batteryCapacity"
-                value={formData.batteryCapacity}
-                onChange={handleInputChange}
-                placeholder="VD: 60"
-                className="w-full px-5 py-4 bg-white/70 backdrop-blur-md border-2 border-gray-200 rounded-2xl text-base font-medium text-gray-800 placeholder-gray-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-400/20 transition-all outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Price */}
-          <div>
-            <label className="text-sm font-bold text-gray-700 mb-3 block">Giá bán (VND)</label>
-            <input
-              type="text"
-              name="price"
-              value={formData.price}
-              onChange={handleInputChange}
-              placeholder="VD: 500,000,000"
-              className="w-full px-5 py-4 bg-white/70 backdrop-blur-md border-2 border-gray-200 rounded-2xl text-base font-medium text-gray-800 placeholder-gray-400 focus:border-green-400 focus:ring-4 focus:ring-green-400/20 transition-all outline-none"
-              required
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="text-sm font-bold text-gray-700 mb-3 block">Mô tả chi tiết</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              rows={5}
-              placeholder="Mô tả tình trạng, lịch sử bảo dưỡng, phụ kiện đi kèm..."
-              className="w-full px-5 py-4 bg-white/70 backdrop-blur-md border-2 border-gray-200 rounded-2xl text-base font-medium text-gray-800 placeholder-gray-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-400/20 transition-all outline-none resize-none"
-              required
-            />
-          </div>
-
-          {/* Images */}
-          <div>
-            <label className="text-sm font-bold text-gray-700 mb-3 block flex items-center">
-              <FiUpload className="w-5 h-5 mr-2 text-purple-600" />
-              Hình ảnh (tối đa 5)
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileChange}
-              className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
-            />
-            {formData.images.length > 0 && (
-              <div className="mt-4 grid grid-cols-5 gap-3">
-                {formData.images.map((file, idx) => (
-                  <div key={idx} className="relative group">
-                    <div className="w-full h-24 rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-50">
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={file.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeImage(idx)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
-                    >
-                      <FiX className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Submit */}
-          <div className="flex justify-end pt-6">
-            <button
-              type="submit"
-              disabled={loading}
-              className={`px-10 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold text-lg rounded-2xl shadow-lg flex items-center space-x-2 transform transition-all duration-300 ${
-                loading ? 'opacity-70 cursor-not-allowed' : 'hover:scale-105 hover:shadow-xl'
-              }`}
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                  </svg>
-                  <span>Đang đăng...</span>
-                </>
-              ) : (
-                <>
-                  <FiCheck className="w-6 h-6" />
-                  <span>Đăng tin</span>
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+    setSuccess(true);
+    setTimeout(() => {
+      onSuccess?.();
+      setStep('choose');
+      resetForms();
+    }, 1200);
+  } catch (err: any) {
+    console.error('Create listing error:', err);
+    setError(err.message || 'Lỗi server');
+  } finally {
+    setLoading(false);
+  }
 };
 
-export default PostListing;
+  if (!user) {
+    return (
+      <div className="p-8 text-center">
+        <FiAlertCircle className="w-12 h-12 mx-auto text-red-500 mb-4" />
+        <p className="text-lg font-medium text-gray-700">Vui lòng đăng nhập</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+          {user.name.charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <p className="font-semibold text-gray-800">{user.name}</p>
+          <p className="text-sm text-gray-600">{user.email}</p>
+        </div>
+      </div>
+
+      {step === 'choose' && (
+        <div>
+          <h3 className="text-xl font-bold text-center mb-6">Bạn muốn bán gì?</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              onClick={() => { setItemType('vehicle'); setStep('create'); }}
+              className="p-6 bg-gradient-to-br from-blue-500 to-cyan-600 text-white rounded-xl shadow hover:scale-105 transition-all"
+            >
+              <FiTruck className="w-12 h-12 mx-auto mb-3" />
+              <p className="font-bold">Xe điện</p>
+            </button>
+            <button
+              onClick={() => { setItemType('battery'); setStep('create'); }}
+              className="p-6 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-xl shadow hover:scale-105 transition-all"
+            >
+              <FiBattery className="w-12 h-12 mx-auto mb-3" />
+              <p className="font-bold">Pin cũ</p>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 'create' && (
+        <div>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-bold">
+              Tạo {itemType === 'vehicle' ? 'xe' : 'pin'}
+            </h3>
+            <button
+              onClick={() => { setStep('choose'); resetForms(); }}
+              className="text-sm text-gray-500 hover:text-gray-700"
+            >
+              Thay đổi
+            </button>
+          </div>
+
+          {itemType === 'vehicle' ? (
+            <div className="space-y-4">
+              <input placeholder="Hãng xe *" value={vehicleForm.brand} onChange={e => setVehicleForm({...vehicleForm, brand: e.target.value})} className="w-full px-4 py-3 border rounded-lg" />
+              <input placeholder="Dòng xe *" value={vehicleForm.model} onChange={e => setVehicleForm({...vehicleForm, model: e.target.value})} className="w-full px-4 py-3 border rounded-lg" />
+              <input type="number" placeholder="Năm sản xuất *" value={vehicleForm.year} onChange={e => setVehicleForm({...vehicleForm, year: e.target.value})} className="w-full px-4 py-3 border rounded-lg" />
+              <input type="number" placeholder="Số km" value={vehicleForm.odometerKm} onChange={e => setVehicleForm({...vehicleForm, odometerKm: e.target.value})} className="w-full px-4 py-3 border rounded-lg" />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <input placeholder="Hãng pin *" value={batteryForm.brand} onChange={e => setBatteryForm({...batteryForm, brand: e.target.value})} className="w-full px-4 py-3 border rounded-lg" />
+              <input placeholder="Model pin *" value={batteryForm.model} onChange={e => setBatteryForm({...batteryForm, model: e.target.value})} className="w-full px-4 py-3 border rounded-lg" />
+              <input type="number" placeholder="Dung lượng (kWh) *" value={batteryForm.batteryCapacityKWh} onChange={e => setBatteryForm({...batteryForm, batteryCapacityKWh: e.target.value})} className="w-full px-4 py-3 border rounded-lg" />
+              <input type="number" placeholder="Sức khỏe (%)" value={batteryForm.batteryHealthPct} onChange={e => setBatteryForm({...batteryForm, batteryHealthPct: e.target.value})} className="w-full px-4 py-3 border rounded-lg" />
+              <input type="number" placeholder="Số chu kỳ" value={batteryForm.cycleCount} onChange={e => setBatteryForm({...batteryForm, cycleCount: e.target.value})} className="w-full px-4 py-3 border rounded-lg" />
+            </div>
+          )}
+
+          <button
+            onClick={handleCreateItem}
+            disabled={loading}
+            className="mt-6 w-full py-3 bg-indigo-600 text-white font-bold rounded-lg flex items-center justify-center gap-2 disabled:opacity-70"
+          >
+            {loading ? <>Đang tạo... <FiRefreshCw className="animate-spin" /></> : <>Tiếp tục <FiArrowRight /></>}
+          </button>
+        </div>
+      )}
+
+      {step === 'listing' && createdId && (
+        <div>
+          <h3 className="text-xl font-bold text-center mb-4">Hoàn tất tin đăng</h3>
+          <p className="text-sm text-green-600 text-center mb-4">
+            Đã tạo {itemType === 'vehicle' ? 'xe' : 'pin'} thành công!
+          </p>
+
+          <input placeholder="Tiêu đề *" value={listingForm.title} onChange={e => setListingForm({...listingForm, title: e.target.value})} className="w-full px-4 py-3 border rounded-lg mb-4" />
+          <textarea placeholder="Mô tả *" value={listingForm.description} onChange={e => setListingForm({...listingForm, description: e.target.value})} rows={3} className="w-full px-4 py-3 border rounded-lg resize-none mb-4" />
+          <input type="text" placeholder="Giá (VND) *" value={listingForm.priceVnd} onChange={e => setListingForm({...listingForm, priceVnd: e.target.value})} className="w-full px-4 py-3 border rounded-lg mb-6" />
+
+          <button
+            onClick={handleCreateListing}
+            disabled={loading}
+            className="w-full py-3 bg-green-600 text-white font-bold rounded-lg flex items-center justify-center gap-2 disabled:opacity-70"
+          >
+            {loading ? <>Đang đăng... <FiRefreshCw className="animate-spin" /></> : <>Đăng tin <FiCheck /></>}
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-center gap-2 text-sm">
+          <FiAlertCircle /> {error}
+        </div>
+      )}
+      {success && (
+        <div className="mt-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-2 text-sm">
+          <FiCheck /> Đăng tin thành công!
+        </div>
+      )}
+    </div>
+  );
+}
