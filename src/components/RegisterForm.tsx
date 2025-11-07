@@ -3,9 +3,11 @@
 import React, { useState } from 'react';
 import { ApiService, RegisterRequest } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 const RegisterForm: React.FC = () => {
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState<RegisterRequest & { confirmPassword: string }>({
     name: '',
     email: '',
@@ -81,7 +83,10 @@ const RegisterForm: React.FC = () => {
       });
 
       if (response.success) {
-        router.push('/dashboard');
+        // Update auth context with user data
+        login(response.data.user);
+        // Redirect to home page
+        router.push('/');
       }
     } catch (error: any) {
       setErrors({
