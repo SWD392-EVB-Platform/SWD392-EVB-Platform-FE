@@ -1,7 +1,7 @@
+// app/post-listing/page.tsx
+
 import PostListing from "@/components/EV&Battery/PostListing";
 
-const PostListingPage: React.FC = () => {
+export default function PostListingPage() {
   return <PostListing />;
-};
-
-export default PostListingPage;
+}
