@@ -2,7 +2,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Eye, Edit, Trash2, Filter, Search, UserCheck, UserX, X } from 'lucide-react';
+import { Eye, Edit, Trash2, Filter, Search, UserCheck, UserX, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ApiService } from '@/lib/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
@@ -20,7 +20,8 @@ interface ApiListing {
 }
 
 interface ApiUser {
-  id: string;
+  id?: string;
+  userId?: string;
   name: string;
   email: string;
   phone?: string | null;
@@ -75,7 +76,7 @@ interface UpdateUserRequest {
   status?: string;
 }
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 5;
 
 const formatDate = (dateString?: string | null) => {
   if (!dateString) return '—';
@@ -108,6 +109,8 @@ const formatCurrency = (amount?: number | null) => {
 export default function UsersPage() {
   const [users, setUsers] = useState<ApiUser[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState('');
@@ -132,14 +135,20 @@ export default function UsersPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const fetchUsers = useCallback(async () => {
+  const fetchUsers = useCallback(async (page?: number) => {
+    const pageToFetch = page ?? currentPage;
     setLoading(true);
     setError(null);
 
     try {
       const params = new URLSearchParams();
-      params.set('page', '1');
+      params.set('page', pageToFetch.toString());
       params.set('pageSize', PAGE_SIZE.toString());
+
+      // Add search filters if searchValue exists
+      if (searchValue.trim()) {
+        params.set('Name', searchValue.trim());
+      }
 
       const response = await fetch(`${API_BASE_URL}/users?${params.toString()}`, {
         headers: {
@@ -154,18 +163,32 @@ export default function UsersPage() {
 
       const data: UsersResponse = await response.json();
 
+      // Debug: log để kiểm tra cấu trúc dữ liệu
+      if (data.items && data.items.length > 0) {
+        console.log('Sample user data:', data.items[0]);
+      }
+
       setUsers(data.items ?? []);
       setTotalCount(data.totalCount ?? data.items?.length ?? 0);
+      setTotalPages(data.totalPages ?? Math.ceil((data.totalCount ?? 0) / PAGE_SIZE));
+      setCurrentPage(data.page ?? pageToFetch);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi khi tải dữ liệu');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentPage, searchValue]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    fetchUsers(1);
+  }, [searchValue]);
+
+  // Separate effect for page changes (not triggered by search)
+  const handlePageChange = useCallback((page: number) => {
+    if (page < 1 || page > totalPages || loading) return;
+    setCurrentPage(page);
+    fetchUsers(page);
+  }, [totalPages, loading, fetchUsers]);
 
   // CRUD Functions
   const fetchUserDetail = useCallback(async (userId: string) => {
@@ -252,7 +275,7 @@ export default function UsersPage() {
       if (result.success) {
         setDeleteModalOpen(false);
         setSelectedUserId(null);
-        await fetchUsers(); // Refresh list
+        await fetchUsers(currentPage); // Refresh list
       } else {
         throw new Error(result.message || 'Xóa người dùng thất bại');
       }
@@ -295,7 +318,7 @@ export default function UsersPage() {
           role: '',
           status: 'Active',
         });
-        await fetchUsers(); // Refresh list
+        await fetchUsers(1); // Refresh list, go to first page
       } else {
         throw new Error(result.message || 'Tạo người dùng thất bại');
       }
@@ -354,7 +377,7 @@ export default function UsersPage() {
           role: '',
           status: 'Active',
         });
-        await fetchUsers(); // Refresh list
+        await fetchUsers(currentPage); // Refresh list
       } else {
         throw new Error(result.message || 'Cập nhật người dùng thất bại');
       }
@@ -365,18 +388,22 @@ export default function UsersPage() {
     }
   }, [selectedUser, formData, fetchUsers]);
 
+  // When searching, reset to page 1
+  useEffect(() => {
+    if (searchValue.trim()) {
+      setCurrentPage(1);
+    }
+  }, [searchValue]);
+
+  // For client-side filtering (if needed as fallback)
   const filteredUsers = useMemo(() => {
-    const term = searchValue.trim().toLowerCase();
-    if (!term) return users;
-
-    return users.filter((user) => {
-      const name = user.name?.toLowerCase() ?? '';
-      const email = user.email?.toLowerCase() ?? '';
-      const phone = user.phone?.toLowerCase() ?? '';
-      const id = user.id?.toLowerCase() ?? '';
-
-      return name.includes(term) || email.includes(term) || phone.includes(term) || id.includes(term);
-    });
+    // If we're using server-side search, just return users
+    // Otherwise, filter client-side
+    if (searchValue.trim()) {
+      // Server-side search is active, return users as-is
+      return users;
+    }
+    return users;
   }, [users, searchValue]);
 
   return (
@@ -433,11 +460,12 @@ export default function UsersPage() {
           <table className="w-full">
             <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-white/20">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">User</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">User ID</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Phone</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Role</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Listings</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Revenue</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -454,7 +482,7 @@ export default function UsersPage() {
                     <div className="space-y-3">
                       <p className="text-sm text-red-500">{error}</p>
                       <button
-                        onClick={fetchUsers}
+                        onClick={() => fetchUsers(currentPage)}
                         className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
                       >
                         Thử lại
@@ -471,30 +499,22 @@ export default function UsersPage() {
               ) : (
                 filteredUsers.map((user) => {
                   const isActive = user.status?.toLowerCase() === 'active';
-                  const listingCount = user.listingSellers?.length ?? 0;
-                  const totalRevenue = user.orders?.reduce((sum, order) => {
-                    const amount = order.payment?.amountVnd ?? 0;
-                    return sum + amount;
-                  }, 0) ?? 0;
-
                   const role = user.role ?? 'member';
+                  const userId = user.userId || user.id || 'N/A';
 
                   return (
-                    <tr key={user.id} className="hover:bg-white/40 transition-all duration-200">
+                    <tr key={user.id || user.userId} className="hover:bg-white/40 transition-all duration-200">
+                      <td className="px-6 py-4 text-sm text-gray-700 font-mono">
+                        {userId}
+                      </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="relative">
-                            <div className="w-11 h-11 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-black font-bold text-sm shadow-md">
-                              {user.name?.charAt(0) ?? 'U'}
-                            </div>
-                            <div className="absolute -inset-1 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full blur-md opacity-60" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-gray-900">{user.name ?? 'Unknown User'}</p>
-                            <p className="text-xs text-gray-500">{user.email ?? 'No email provided'}</p>
-                            <p className="text-xs text-gray-400">Tham gia: {formatDate(user.createdAt)}</p>
-                          </div>
-                        </div>
+                        <p className="font-semibold text-gray-900">{user.name ?? 'Unknown User'}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-sm text-gray-700">{user.email ?? 'No email provided'}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-sm text-gray-700">{user.phone ?? '—'}</p>
                       </td>
                       <td className="px-6 py-4">
                         <span
@@ -520,12 +540,10 @@ export default function UsersPage() {
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 font-medium">{listingCount}</td>
-                      <td className="px-6 py-4 text-sm font-semibold text-green-600">{formatCurrency(totalRevenue)}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => handleViewUser(user.id)}
+                            onClick={() => handleViewUser(user.userId || user.id || '')}
                             className="p-2 hover:bg-blue-50 rounded-xl transition text-blue-600 hover:text-blue-700"
                             aria-label="View user details"
                             title="Xem chi tiết"
@@ -533,7 +551,7 @@ export default function UsersPage() {
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleEditUser(user.id)}
+                            onClick={() => handleEditUser(user.userId || user.id || '')}
                             className="p-2 hover:bg-yellow-50 rounded-xl transition text-yellow-600 hover:text-yellow-700"
                             aria-label="Edit user"
                             title="Chỉnh sửa"
@@ -541,7 +559,7 @@ export default function UsersPage() {
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteUser(user.id)}
+                            onClick={() => handleDeleteUser(user.userId || user.id || '')}
                             className="p-2 hover:bg-red-50 rounded-xl transition text-red-600 hover:text-red-700"
                             aria-label="Delete user"
                             title="Xóa"
@@ -556,6 +574,71 @@ export default function UsersPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-6 border-t border-white/20">
+          <div className="text-sm text-gray-600">
+            Hiển thị <strong>{(currentPage - 1) * PAGE_SIZE + 1}</strong> - <strong>{Math.min(currentPage * PAGE_SIZE, totalCount)}</strong> trong tổng số <strong>{totalCount}</strong> người dùng
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {/* Previous Button */}
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1 || loading}
+              className="p-2 rounded-xl bg-white/50 backdrop-blur-sm hover:bg-white/70 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Trang trước"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            {/* Page Numbers */}
+            <div className="flex gap-2">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum: number;
+                
+                if (totalPages <= 5) {
+                  // Show all pages if total pages <= 5
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  // Show first 5 pages
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  // Show last 5 pages
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  // Show pages around current page
+                  pageNum = currentPage - 2 + i;
+                }
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    disabled={loading}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-medium transition-all ${
+                      pageNum === currentPage
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                        : 'bg-white/50 backdrop-blur-sm hover:bg-white/70 text-gray-700'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Next Button */}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages || loading}
+              className="p-2 rounded-xl bg-white/50 backdrop-blur-sm hover:bg-white/70 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Trang sau"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
