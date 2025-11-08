@@ -5,6 +5,8 @@ export interface Vehicle {
   model: string;
   year: number;
   odometerKm: number;
+  avatarUrl: string | null;
+  priceVnd: number;
   status: string;
   createdAt: string;
   updatedAt: string;

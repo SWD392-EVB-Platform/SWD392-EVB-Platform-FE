@@ -2,6 +2,7 @@
 'use client';
 
 import { Calendar, Clock, DollarSign, Eye, MessageSquare, Package, Tag, ThumbsUp, TrendingUp, Upload, X } from 'lucide-react';
+import Image from 'next/image';
 import { useState } from 'react';
 
 const mockListings = [
@@ -157,7 +158,7 @@ export default function ListingsPage() {
 
               {/* Title */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                <label className="inline-block text-sm font-medium text-gray-700 mb-2">Title</label>
                 <input
                   type="text"
                   required
@@ -171,7 +172,7 @@ export default function ListingsPage() {
               {/* Price & Year */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                  <label className="inline-flex text-sm font-medium text-gray-700 mb-2 items-center gap-1">
                     <DollarSign className="w-4 h-4" /> Price
                   </label>
                   <input
@@ -184,7 +185,7 @@ export default function ListingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                  <label className="inline-flex text-sm font-medium text-gray-700 mb-2 items-center gap-1">
                     <Calendar className="w-4 h-4" /> Year
                   </label>
                   <input
@@ -200,7 +201,7 @@ export default function ListingsPage() {
 
               {/* Condition */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                <label className="inline-flex text-sm font-medium text-gray-700 mb-2 items-center gap-1">
                   <Tag className="w-4 h-4" /> Condition
                 </label>
                 <select
@@ -216,7 +217,7 @@ export default function ListingsPage() {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <label className="inline-block text-sm font-medium text-gray-700 mb-2">Description</label>
                 <textarea
                   rows={4}
                   value={form.description}
@@ -228,15 +229,17 @@ export default function ListingsPage() {
 
               {/* Image Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                <label className="inline-flex text-sm font-medium text-gray-700 mb-2 items-center gap-1">
                   <Upload className="w-4 h-4" /> Photos (up to 5)
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {imagePreviews.map((src, i) => (
                     <div key={i} className="relative group">
-                      <img
+                      <Image
                         src={src}
                         alt={`Preview ${i + 1}`}
+                        width={320}
+                        height={128}
                         className="w-full h-32 object-cover rounded-xl shadow-md"
                       />
                       <button

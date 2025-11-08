@@ -1,20 +1,12 @@
 'use client';
 
-import { ApiService } from '@/lib/api';
-import { useEffect, useState } from 'react';
-import {
-  FiAlertCircle,
-  FiArrowRight,
-  FiBattery,
-  FiCheck,
-  FiRefreshCw,
-  FiTruck,
-} from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { FiCalendar, FiMapPin, FiTruck, FiAlertCircle, FiBattery, FiRefreshCw, FiArrowRight, FiCheck } from 'react-icons/fi'; 
 
 import { BatteryService } from '@/features/batteries/services/batteryService';
 import ListingService from '@/features/listing/services/ListingService';
 import { VehicleService } from '@/features/vehicles/services/vehicleService';
-import type { User } from '@/lib/api';
+import { ApiService, type User } from '@/lib/api';
 
 interface PostListingProps {
   onSuccess?: () => void;

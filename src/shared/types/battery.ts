@@ -9,6 +9,8 @@ export interface Battery {
   chemistry: string;
   nominalVoltageV: number;
   compatibilityNote: string;
+  avatarUrl: string | null;
+  priceVnd: number;
   status: string;
   createdAt: string;
   updatedAt: string;

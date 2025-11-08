@@ -32,7 +32,7 @@ const SearchPage: React.FC = () => {
       setBatteries(batteriesData.items);
       setVehicles(vehiclesData.items);
     } catch (err) {
-      setError('Failed to load data. Please try again later.');
+      setError('Không thể tải dữ liệu. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }
@@ -59,7 +59,7 @@ const SearchPage: React.FC = () => {
         setVehicles(results.items);
       }
     } catch (err) {
-      setError('Search failed. Please try again later.');
+      setError('Tìm kiếm thất bại. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ const SearchPage: React.FC = () => {
                 : 'text-gray-600 hover:text-blue-600'
             }`}
           >
-            Batteries
+            Pin xe điện
           </button>
           <button
             onClick={() => setActiveTab('vehicles')}
@@ -87,7 +87,7 @@ const SearchPage: React.FC = () => {
                 : 'text-gray-600 hover:text-blue-600'
             }`}
           >
-            Vehicles
+            Xe điện
           </button>
         </div>
       </div>
@@ -116,14 +116,14 @@ const SearchPage: React.FC = () => {
                 <BatteryCard key={battery.batteryId} battery={battery} />
               ))
             ) : (
-              <p className="col-span-3 text-center text-gray-500">No batteries found.</p>
+              <p className="col-span-3 text-center text-gray-500">Không tìm thấy pin nào.</p>
             )
           ) : vehicles.length > 0 ? (
             vehicles.map((vehicle) => (
               <VehicleCard key={vehicle.vehicleId} vehicle={vehicle} />
             ))
           ) : (
-            <p className="col-span-3 text-center text-gray-500">No vehicles found.</p>
+            <p className="col-span-3 text-center text-gray-500">Không tìm thấy xe nào.</p>
           )}
         </div>
       )}
