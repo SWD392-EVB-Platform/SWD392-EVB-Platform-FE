@@ -118,7 +118,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
                 <div className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">Vai trò</span>
+                    <span className="text-xs text-gray-500">Role</span>
                     <span className="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full font-semibold">
                       {user.role?.toUpperCase() || 'ADMIN'}
                     </span>
