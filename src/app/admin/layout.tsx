@@ -127,7 +127,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     onClick={logout}
                     className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 font-medium"
                   >
-                    Đăng xuất
+                    Log out
                   </button>
                 </div>
               </div>
