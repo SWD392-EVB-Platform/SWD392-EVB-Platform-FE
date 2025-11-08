@@ -72,4 +72,71 @@ export class ContractService {
       throw error;
     }
   }
+
+  // Fetch contract preview by orderId
+  static async getContractByOrder(orderId: string): Promise<Contract> {
+    try {
+      const response = await fetch(`${API_ENDPOINT}/contract/${encodeURIComponent(orderId)}`, {
+        headers: {
+          ...ApiService.getAuthHeaders(),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch contract by order');
+      }
+
+      const result = await response.json();
+      return result.data;
+    } catch (error) {
+      console.error('Error fetching contract by order:', error);
+      throw error;
+    }
+  }
+
+  // Accept contract (click-to-accept) for order
+  static async acceptContract(orderId: string): Promise<any> {
+    try {
+      const response = await fetch(`${API_ENDPOINT}/orders/${encodeURIComponent(orderId)}/contracts/accept`, {
+        method: 'POST',
+        headers: {
+          ...ApiService.getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to accept contract');
+      }
+
+      const result = await response.json();
+      return result.data;
+    } catch (error) {
+      console.error('Error accepting contract:', error);
+      throw error;
+    }
+  }
+
+  // Cancel contract for order
+  static async cancelContract(orderId: string): Promise<any> {
+    try {
+      const response = await fetch(`${API_ENDPOINT}/orders/${encodeURIComponent(orderId)}/contracts/cancel`, {
+        method: 'POST',
+        headers: {
+          ...ApiService.getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to cancel contract');
+      }
+
+      const result = await response.json();
+      return result.data;
+    } catch (error) {
+      console.error('Error cancelling contract:', error);
+      throw error;
+    }
+  }
 }

@@ -9,11 +9,22 @@ interface VehicleCardProps {
 export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle }) => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="relative h-48 bg-gray-200">
+        <Image
+          src={vehicle.avatarUrl || '/images/vehicle-placeholder.jpg'}
+          alt={`${vehicle.brand} ${vehicle.model}`}
+          fill
+          className="object-cover"
+        />
+      </div>
       <div className="p-4">
         <h3 className="text-xl font-semibold mb-2">{vehicle.brand} {vehicle.model}</h3>
+        <div className="text-xl font-bold text-blue-600 mb-3">
+          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(vehicle.priceVnd)}
+        </div>
         <div className="space-y-2">
           <div className="flex justify-between">
-            <span className="text-gray-600">Year:</span>
+            <span className="text-gray-600">Năm sản xuất:</span>
             <span className="font-medium">{vehicle.year}</span>
           </div>
           <div className="flex justify-between">

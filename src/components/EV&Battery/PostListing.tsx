@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FiCalendar, FiMapPin, FiTruck } from 'react-icons/fi'; // ĐÃ SỬA: FiCar → FiTruck
+import { FiCalendar, FiMapPin, FiTruck } from 'react-icons/fi'; 
 
 interface FormData {
   itemType: 'vehicle' | 'battery';
