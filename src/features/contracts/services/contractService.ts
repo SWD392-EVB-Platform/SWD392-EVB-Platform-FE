@@ -74,7 +74,8 @@ export class ContractService {
   }
 
   // Fetch contract preview by orderId
-  static async getContractByOrder(orderId: string): Promise<Contract> {
+  // Returns null if contract doesn't exist yet (will be created by IPN callback)
+  static async getContractByOrder(orderId: string): Promise<Contract | null> {
     try {
       const response = await fetch(`${API_ENDPOINT}/contract/${encodeURIComponent(orderId)}`, {
         headers: {
@@ -83,14 +84,22 @@ export class ContractService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch contract by order');
+        // 404 means contract doesn't exist yet (normal case after payment)
+        if (response.status === 404) {
+          console.log(`Contract for order ${orderId} not found yet (will be created by IPN callback)`);
+          return null;
+        }
+        // Other errors should be thrown
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch contract: ${response.status} ${errorText}`);
       }
 
       const result = await response.json();
-      return result.data;
+      return result.data || null;
     } catch (error) {
       console.error('Error fetching contract by order:', error);
-      throw error;
+      // Return null instead of throwing - contract may not exist yet
+      return null;
     }
   }
 
