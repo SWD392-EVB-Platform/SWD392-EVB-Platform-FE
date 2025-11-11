@@ -2,7 +2,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Clock, Eye, MessageSquare, ThumbsUp, TrendingUp } from 'lucide-react';
+import { Clock, Eye, MessageSquare, ThumbsUp, TrendingUp, X } from 'lucide-react';
 import { ApiService } from '@/lib/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
@@ -46,6 +46,18 @@ export default function ListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    sellerId: '',
+    vehicleId: '',
+    batteryId: '',
+    title: '',
+    description: '',
+    priceVnd: '',
+    status: 'Draft',
+  });
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
@@ -106,7 +118,22 @@ export default function ListingsPage() {
               Total: <strong>{listings.length}</strong> listings
             </p>
           </div>
-          <button className="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all">
+          <button
+            onClick={() => {
+              setFormError(null);
+              setFormData({
+                sellerId: '',
+                vehicleId: '',
+                batteryId: '',
+                title: '',
+                description: '',
+                priceVnd: '',
+                status: 'Draft',
+              });
+              setCreateOpen(true);
+            }}
+            className="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all"
+          >
             + New Listing
           </button>
         </div>
@@ -200,6 +227,178 @@ export default function ListingsPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Create Listing Modal */}
+      {createOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto backdrop-blur-xl bg-white/80 rounded-3xl shadow-2xl border border-white/30 p-8">
+            <button
+              onClick={() => {
+                setCreateOpen(false);
+                setFormError(null);
+              }}
+              className="absolute top-6 right-6 p-2 bg-white/50 backdrop-blur-sm rounded-full hover:bg-white/80 transition"
+            >
+              <X className="w-5 h-5 text-gray-700" />
+            </button>
+
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Create Listing</h2>
+
+            {formError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {formError}
+              </div>
+            )}
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  setFormLoading(true);
+                  setFormError(null);
+
+                  const payload = {
+                    sellerId: formData.sellerId || undefined,
+                    vehicleId: formData.vehicleId || undefined,
+                    batteryId: formData.batteryId || undefined,
+                    title: formData.title,
+                    description: formData.description || undefined,
+                    priceVnd: Number(formData.priceVnd) || 0,
+                    status: formData.status,
+                  };
+
+                  const response = await fetch(`${API_BASE_URL}/listings`, {
+                    method: 'POST',
+                    headers: {
+                      ...ApiService.getAuthHeaders(),
+                      'Content-Type': 'application/json',
+                      Accept: 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                  });
+
+                  if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.message || 'Không thể tạo listing');
+                  }
+
+                  const data = await response.json();
+                  if (data?.success === false) {
+                    throw new Error(data.message || 'Tạo listing thất bại');
+                  }
+
+                  setCreateOpen(false);
+                  await fetchListings();
+                } catch (err) {
+                  setFormError(err instanceof Error ? err.message : 'Đã xảy ra lỗi khi tạo listing');
+                } finally {
+                  setFormLoading(false);
+                }
+              }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Seller ID *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.sellerId}
+                    onChange={(e) => setFormData({ ...formData, sellerId: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl backdrop-blur-sm bg-white/50 border border-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle ID</label>
+                  <input
+                    type="text"
+                    value={formData.vehicleId}
+                    onChange={(e) => setFormData({ ...formData, vehicleId: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl backdrop-blur-sm bg-white/50 border border-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Battery ID</label>
+                  <input
+                    type="text"
+                    value={formData.batteryId}
+                    onChange={(e) => setFormData({ ...formData, batteryId: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl backdrop-blur-sm bg-white/50 border border-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl backdrop-blur-sm bg-white/50 border border-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="Draft">Draft</option>
+                    <option value="Active">Active</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="w-full px-4 py-2 rounded-xl backdrop-blur-sm bg-white/50 border border-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={4}
+                  className="w-full px-4 py-2 rounded-xl backdrop-blur-sm bg-white/50 border border-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price (VND) *</label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.priceVnd}
+                    onChange={(e) => setFormData({ ...formData, priceVnd: e.target.value })}
+                    className="w-full px-4 py-2 rounded-xl backdrop-blur-sm bg-white/50 border border-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={formLoading}
+                  className="flex-1 px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                >
+                  {formLoading ? 'Đang tạo...' : 'Tạo Listing'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreateOpen(false);
+                    setFormError(null);
+                  }}
+                  className="px-5 py-2.5 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition"
+                >
+                  Hủy
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
