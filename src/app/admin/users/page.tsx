@@ -745,6 +745,8 @@ export default function UsersPage() {
                 <input
                   type="email"
                   required
+                  autoComplete="off"
+                  placeholder={editModalOpen ? '' : 'name@example.com'}
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full px-4 py-2 rounded-xl backdrop-blur-sm bg-white/50 border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -758,6 +760,8 @@ export default function UsersPage() {
                 <input
                   type="password"
                   required={!editModalOpen}
+                  autoComplete="new-password"
+                  placeholder={editModalOpen ? '••••••••' : 'Nhập mật khẩu'}
                   value={formData.passwordHash}
                   onChange={(e) => setFormData({ ...formData, passwordHash: e.target.value })}
                   className="w-full px-4 py-2 rounded-xl backdrop-blur-sm bg-white/50 border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -782,7 +786,6 @@ export default function UsersPage() {
                   className="w-full px-4 py-2 rounded-xl backdrop-blur-sm bg-white/50 border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Chọn vai trò</option>
-                  <option value="buyer">Buyer</option>
                   <option value="seller">Seller</option>
                   <option value="premium">Premium</option>
                   <option value="moderator">Moderator</option>
@@ -810,18 +813,6 @@ export default function UsersPage() {
                   className="flex-1 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
                 >
                   {formLoading ? 'Đang xử lý...' : editModalOpen ? 'Cập nhật' : 'Tạo mới'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCreateModalOpen(false);
-                    setEditModalOpen(false);
-                    setSelectedUser(null);
-                    setFormError(null);
-                  }}
-                  className="px-5 py-2.5 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition"
-                >
-                  Hủy
                 </button>
               </div>
             </form>
