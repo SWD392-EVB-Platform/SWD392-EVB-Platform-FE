@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import { usePathname } from 'next/navigation';
 import React from 'react';
+import { ToastContainer } from 'react-toastify';
 
 export default function ClientLayout({
   children,
@@ -24,6 +25,20 @@ export default function ClientLayout({
       </main>
 
       {!isAdmin && <Footer />}
+
+      {/* Toast Container - hiển thị ở góc phải màn hình */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </>
   );
 }

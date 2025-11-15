@@ -5,6 +5,7 @@ import { ApiService, RegisterRequest } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { toast } from 'react-toastify';
 
 const RegisterForm: React.FC = () => {
   const router = useRouter();
@@ -86,13 +87,19 @@ const RegisterForm: React.FC = () => {
       if (response.success) {
         // Update auth context with user data
         login(response.data.user);
+        // Hiển thị thông báo thành công bằng toast
+        toast.success('Đăng ký thành công! Đang chuyển hướng...');
         // Redirect to home page
-        router.push('/');
+        setTimeout(() => {
+          router.push('/');
+        }, 1000);
       }
     } catch (error: any) {
+      const errorMessage = error.message || 'Đăng ký thất bại. Vui lòng thử lại.';
       setErrors({
-        submit: error.message || 'Sign up failed. Please try again.',
+        submit: errorMessage,
       });
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -237,12 +244,6 @@ const RegisterForm: React.FC = () => {
           'Sign up'
         )}
       </button>
-
-      {errors.submit && (
-        <div className="glass-transparent border border-red-400/30 rounded-lg p-3">
-          <p className="text-sm text-red-400">{errors.submit}</p>
-        </div>
-      )}
 
       <div className="text-center">
         <p className="text-sm text-gray-600">

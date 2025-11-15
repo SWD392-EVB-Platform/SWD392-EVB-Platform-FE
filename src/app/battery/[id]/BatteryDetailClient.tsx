@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
 import { useAppDispatch } from '@/store/hooks';
 import { setSelectedBattery } from '@/store/slices/productSlice';
+import { toast } from 'react-toastify';
 
 interface BatteryDetailClientProps {
   initialBatteryId: string;
@@ -44,12 +45,12 @@ export default function BatteryDetailClient({ initialBatteryId }: BatteryDetailC
     }
 
     if (!battery) {
-      alert('Không thể tải thông tin sản phẩm. Vui lòng thử lại sau.');
+      toast.error('Không thể tải thông tin sản phẩm. Vui lòng thử lại sau.');
       return;
     }
 
     if (!battery.priceVnd || battery.priceVnd <= 0) {
-      alert('Không thể thanh toán: Sản phẩm chưa có giá hoặc giá không hợp lệ. Vui lòng liên hệ người bán để biết giá.');
+      toast.error('Không thể thanh toán: Sản phẩm chưa có giá hoặc giá không hợp lệ. Vui lòng liên hệ người bán để biết giá.');
       return;
     }
 

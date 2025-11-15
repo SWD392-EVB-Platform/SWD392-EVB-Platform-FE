@@ -1,58 +1,79 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ROUTES } from '@/shared/constants/routes';
 
 const HeroSection: React.FC = () => {
   return (
-    <div className="text-center mb-12">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">
-        Welcome to EVB Platform
-      </h1>
-      <p className="text-xl text-gray-600 mb-8">
-        Vietnam leading marketplace for electric vehicles and batteries
-      </p>
-      
-      {/* Hero CTA */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-8">
-        <div className="flex flex-col items-center justify-center gap-6">
-          <Link 
+    <div className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+      {/* Background Image với overlay */}
+      <div className="absolute inset-0 z-0">
+        {/* Background Image */}
+        <Image
+          src="/images/hero-background.jpg"
+          alt="Electric Vehicle Background"
+          fill
+          priority
+          className="object-cover"
+          style={{ objectPosition: 'center' }}
+        />
+        {/* Overlay để text dễ đọc hơn - giảm độ mờ */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-cyan-900/15 to-green-900/20"></div>
+        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 text-center px-4 py-20 max-w-5xl mx-auto">
+        {/* Main Heading */}
+        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+          <span className="text-gray-900">Nền Tảng Giao Dịch</span>
+          <br />
+          <span className="text-blue-600">Xe Điện</span>
+          <span className="text-gray-900"> & </span>
+          <span className="text-green-600">Pin Qua Sử Dụng</span>
+        </h1>
+
+        {/* Description */}
+        <p className="text-lg md:text-xl text-gray-900 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
+          Mua bán xe điện và pin đã qua sử dụng một cách an toàn, minh bạch với{' '}
+          <span className="font-bold text-blue-600">công nghệ AI hỗ trợ định giá</span>
+        </p>
+
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          {/* Nút Khám phá ngay - Gradient xanh dương đến xanh lá */}
+          <Link
             href={ROUTES.SEARCH}
-            className="inline-flex items-center px-8 py-4 bg-yellow-400 text-black text-xl font-semibold rounded-lg hover:bg-yellow-300 transition-colors duration-200"
+            className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-500 to-green-500 text-white text-lg font-semibold rounded-lg hover:from-blue-600 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
           >
-            <svg 
-              className="w-6 h-6 mr-2" 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className="w-6 h-6 mr-2"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" 
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
-            Start Shopping
+            Khám phá ngay
           </Link>
-          <p className="text-lg text-gray-700">
-            Find your perfect electric vehicle or battery today
-          </p>
-          <div className="flex gap-4">
-            <Link
-              href={`${ROUTES.SEARCH}?type=xe`}
-              className="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors duration-200"
-            >
-              Browse EVs
-            </Link>
-            <Link
-              href={`${ROUTES.SEARCH}?type=pin`} 
-              className="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors duration-200"
-            >
-              Browse Batteries
-            </Link>
-          </div>
+
+          {/* Nút Đăng tin bán - Nền trắng/xám nhạt */}
+          <Link
+            href={ROUTES.POST_LISTING}
+            className="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-800 text-lg font-semibold rounded-lg border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+          >
+            Đăng tin bán
+          </Link>
         </div>
       </div>
+
     </div>
   );
 };

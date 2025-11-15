@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import ClientLayout from './ClientLayout';
 import ReduxProvider from '@/store/ReduxProvider';
 import './globals.css';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Metadata ở đây → Server Component → HỢP LỆ
 export const metadata: Metadata = {
