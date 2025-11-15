@@ -3,6 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { ApiService, LoginRequest } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
 const LoginForm: React.FC = () => {
@@ -228,13 +229,12 @@ const LoginForm: React.FC = () => {
         </div>
       )}
 
-      {/* Register Link */}
       <div className="text-center">
         <p className="text-sm text-gray-600">
           Chưa có tài khoản?{' '}
-          <a href="/register" className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors">
+          <Link href="/register" className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors">
             Đăng ký ngay
-          </a>
+          </Link>
         </p>
       </div>
     </form>

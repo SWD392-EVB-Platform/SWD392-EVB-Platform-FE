@@ -56,16 +56,38 @@ export class PaymentService {
 
       const result = await response.json();
       console.log('Payment API response:', result);
+      console.log('Payment URL received:', result.data?.paymentUrl);
 
       // API may return 200 OK but with success: false for business logic errors
       if (!response.ok || !result.success) {
         const errorMsg = result.message || 'Failed to create VNPay payment for order';
         console.error('Payment creation failed:', errorMsg);
+        console.error('Full response:', result);
         return {
           success: false,
           message: errorMsg,
           data: null
         };
+      }
+
+      // Validate payment URL
+      if (result.data?.paymentUrl) {
+        try {
+          const url = new URL(result.data.paymentUrl);
+          console.log('Payment URL validated. Domain:', url.hostname);
+          
+          // Check if it's a VNPay URL
+          if (!url.hostname.includes('vnpay.vn') && !url.hostname.includes('sandbox.vnpayment.vn')) {
+            console.warn('Warning: Payment URL does not appear to be a VNPay URL:', url.hostname);
+          }
+        } catch (urlError) {
+          console.error('Invalid payment URL format:', result.data.paymentUrl);
+          return {
+            success: false,
+            message: 'URL thanh toán không hợp lệ từ server. Vui lòng thử lại sau.',
+            data: null
+          };
+        }
       }
 
       // Return the API response directly
