@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { ApiService, RegisterRequest } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 
 const RegisterForm: React.FC = () => {
   const router = useRouter();
@@ -245,10 +246,10 @@ const RegisterForm: React.FC = () => {
 
       <div className="text-center">
         <p className="text-sm text-gray-600">
-          Already have an account?{' '}
-          <a href="/login" className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors duration-200">
-            Sign in
-          </a>
+          Đã có tài khoản?{' '}
+          <Link href="/login" className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors duration-200">
+            Đăng nhập
+          </Link>
         </p>
       </div>
     </form>

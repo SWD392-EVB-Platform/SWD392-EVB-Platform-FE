@@ -4,9 +4,9 @@ import { Battery } from '@/shared/types/battery';
 import { BatteryService } from '@/features/batteries/services/batteryService';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { OrderService } from '@/features/orders/services/orderService';
-import { PaymentService } from '@/features/payments/services/paymentService';
 import { useEffect, useState } from 'react';
+import { useAppDispatch } from '@/store/hooks';
+import { setSelectedBattery } from '@/store/slices/productSlice';
 
 interface BatteryDetailClientProps {
   initialBatteryId: string;
@@ -14,10 +14,10 @@ interface BatteryDetailClientProps {
 
 export default function BatteryDetailClient({ initialBatteryId }: BatteryDetailClientProps) {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [battery, setBattery] = useState<Battery | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [processing, setProcessing] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -26,6 +26,7 @@ export default function BatteryDetailClient({ initialBatteryId }: BatteryDetailC
         setLoading(true);
         const data = await BatteryService.getBatteryById(initialBatteryId);
         setBattery(data);
+        dispatch(setSelectedBattery(data));
       } catch (err: any) {
         setError(err?.message || 'Không thể tải thông tin pin. Vui lòng thử lại sau.');
       } finally {
@@ -34,9 +35,9 @@ export default function BatteryDetailClient({ initialBatteryId }: BatteryDetailC
     };
 
     fetchBattery();
-  }, [initialBatteryId]);
+  }, [initialBatteryId, dispatch]);
 
-  const handlePurchase = async () => {
+  const handlePurchase = () => {
     if (!user) {
       router.push('/login');
       return;
@@ -47,53 +48,12 @@ export default function BatteryDetailClient({ initialBatteryId }: BatteryDetailC
       return;
     }
 
-    // Validate price before proceeding
     if (!battery.priceVnd || battery.priceVnd <= 0) {
       alert('Không thể thanh toán: Sản phẩm chưa có giá hoặc giá không hợp lệ. Vui lòng liên hệ người bán để biết giá.');
       return;
     }
 
-    setProcessing(true);
-    try {
-      if (!user?.userId) {
-        throw new Error('Thông tin người dùng không hợp lệ');
-      }
-
-      // Create order with minimal data
-      const orderPayload = {
-        buyerId: user.userId,
-        batteryId: initialBatteryId,
-        vehicleId: null
-      };
-      console.log('Creating order:', orderPayload);
-      
-      const order = await OrderService.createOrder(orderPayload);
-      console.log('Order response:', order);
-
-      if (!order?.success || !order.data?.id) {
-        throw new Error(order?.message || 'Không thể tạo đơn hàng. Vui lòng thử lại sau.');
-      }
-
-      // Create payment - backend will use the listing price
-      console.log('Creating payment for order:', order.data.id);
-      const payment = await PaymentService.createVNPayForOrder(order.data.id);
-      console.log('Payment response:', payment);
-
-      if (!payment?.success) {
-        throw new Error(payment?.message || 'Không thể tạo liên kết thanh toán. Vui lòng thử lại sau.');
-      }
-
-      if (!payment.data?.paymentUrl) {
-        throw new Error('Không thể tạo liên kết thanh toán. Vui lòng thử lại sau.');
-      }
-
-      window.location.href = payment.data.paymentUrl;
-    } catch (err: any) {
-      console.error('Purchase failed:', err);
-      alert(err?.message || 'Không thể hoàn tất giao dịch. Vui lòng thử lại sau.');
-    } finally {
-      setProcessing(false);
-    }
+    router.push(`/payment/confirm?type=battery&id=${initialBatteryId}`);
   };
 
   if (loading) {
@@ -108,7 +68,7 @@ export default function BatteryDetailClient({ initialBatteryId }: BatteryDetailC
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error || 'Battery not found'}
+          {error || 'Không tìm thấy pin'}
         </div>
       </div>
     );
@@ -118,50 +78,48 @@ export default function BatteryDetailClient({ initialBatteryId }: BatteryDetailC
     <div className="container mx-auto px-4 py-8">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="grid md:grid-cols-2 gap-8 p-6">
-          {/* Left column - Image */}
           <div className="relative h-96 bg-gradient-to-br from-green-100 to-green-50 rounded-lg flex items-center justify-center">
             <div className="text-6xl text-green-500/30">🔋</div>
           </div>
 
-          {/* Right column - Details */}
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{battery.brand && battery.model ? `${battery.brand} ${battery.model}` : 'CATL EVC'}</h1>
-              <p className="text-lg text-gray-500 mt-2">Battery ID: {battery.batteryId}</p>
+              <p className="text-lg text-gray-500 mt-2">Mã pin: {battery.batteryId}</p>
             </div>
 
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Capacity</h3>
+                  <h3 className="text-sm font-medium text-gray-500">Dung lượng</h3>
                   <p className="text-lg font-semibold">{battery.batteryCapacityKwh} kWh</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Health</h3>
+                  <h3 className="text-sm font-medium text-gray-500">Tình trạng pin</h3>
                   <p className="text-lg font-semibold">{battery.batteryHealthPct}%</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Cycle Count</h3>
-                  <p className="text-lg font-semibold">{battery.cycleCount} cycles</p>
+                  <h3 className="text-sm font-medium text-gray-500">Số chu kỳ</h3>
+                  <p className="text-lg font-semibold">{battery.cycleCount} chu kỳ</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Price</h3>
+                  <h3 className="text-sm font-medium text-gray-500">Giá</h3>
                   <p className="text-lg font-semibold">
                     {battery.priceVnd && battery.priceVnd > 0 
-                      ? `${(battery.priceVnd / 1000000).toLocaleString()} triệu VNĐ`
+                      ? `${battery.priceVnd.toLocaleString('vi-VN')} VND`
                       : 'Liên hệ để biết giá'}
                   </p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Status</h3>
-                  <p className="text-lg font-semibold capitalize">{battery.status.toLowerCase()}</p>
+                  <h3 className="text-sm font-medium text-gray-500">Trạng thái</h3>
+                  <p className="text-lg font-semibold capitalize">{battery.status.toLowerCase() === 'available' ? 'Có sẵn' : battery.status}</p>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Last Updated</h3>
+                <h3 className="text-sm font-medium text-gray-500">Cập nhật lần cuối</h3>
                 <p className="mt-1 text-gray-900">
-                  {new Date(battery.updatedAt).toLocaleDateString()}
+                  {new Date(battery.updatedAt).toLocaleDateString('vi-VN')}
                 </p>
               </div>
 
@@ -171,12 +129,9 @@ export default function BatteryDetailClient({ initialBatteryId }: BatteryDetailC
                     <div className="pt-6">
                       <button
                         onClick={handlePurchase}
-                        disabled={processing}
-                        className={`w-full ${
-                          processing ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
-                        } text-white py-3 px-8 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-8 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        {processing ? 'Processing...' : 'Purchase Now'}
+                        Mua ngay
                       </button>
                     </div>
                   ) : (

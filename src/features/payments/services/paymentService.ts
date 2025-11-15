@@ -10,6 +10,20 @@ export interface VNPayCreatePaymentResponse {
   } | null;
 }
 
+export interface VNPayReturnResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    success: boolean;
+    message: string;
+    orderId?: string;
+    amount?: string;
+    transactionNo?: string;
+    responseCode?: string;
+    transactionStatus?: string;
+  };
+}
+
 export interface VNPayCallbackResponse {
   success: boolean;
   message: string;
@@ -42,16 +56,38 @@ export class PaymentService {
 
       const result = await response.json();
       console.log('Payment API response:', result);
+      console.log('Payment URL received:', result.data?.paymentUrl);
 
       // API may return 200 OK but with success: false for business logic errors
       if (!response.ok || !result.success) {
         const errorMsg = result.message || 'Failed to create VNPay payment for order';
         console.error('Payment creation failed:', errorMsg);
+        console.error('Full response:', result);
         return {
           success: false,
           message: errorMsg,
           data: null
         };
+      }
+
+      // Validate payment URL
+      if (result.data?.paymentUrl) {
+        try {
+          const url = new URL(result.data.paymentUrl);
+          console.log('Payment URL validated. Domain:', url.hostname);
+          
+          // Check if it's a VNPay URL
+          if (!url.hostname.includes('vnpay.vn') && !url.hostname.includes('sandbox.vnpayment.vn')) {
+            console.warn('Warning: Payment URL does not appear to be a VNPay URL:', url.hostname);
+          }
+        } catch (urlError) {
+          console.error('Invalid payment URL format:', result.data.paymentUrl);
+          return {
+            success: false,
+            message: 'URL thanh toán không hợp lệ từ server. Vui lòng thử lại sau.',
+            data: null
+          };
+        }
       }
 
       // Return the API response directly
@@ -67,6 +103,49 @@ export class PaymentService {
   }
 
 
+  /**
+   * Gọi backend endpoint /api/payments/vnpay/return để lấy kết quả thanh toán
+   * Backend sẽ trả về thông báo thành công/thất bại
+   * GET /api/payments/vnpay/return
+   */
+  static async getVNPayReturnResult(vnpParams: Record<string, any>): Promise<VNPayReturnResponse> {
+    try {
+      // Build query string from vnpParams
+      const qs = new URLSearchParams();
+      Object.entries(vnpParams).forEach(([k, v]) => {
+        if (v !== undefined && v !== null) qs.append(k, String(v));
+      });
+
+      const url = `${API_ENDPOINT}/payments/vnpay/return${qs.toString() ? '?' + qs.toString() : ''}`;
+      console.log('Calling VNPay return endpoint:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          ...ApiService.getAuthHeaders(),
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('getVNPayReturnResult failed:', response.status, text);
+        throw new Error('Failed to get VNPay return result');
+      }
+
+      const result = await response.json();
+      console.log('VNPay return response:', result);
+      return result;
+    } catch (error) {
+      console.error('Error getting VNPay return result:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Gọi backend IPN callback endpoint (VNPay gọi server để xác nhận)
+   * GET /api/payments/vnpay/callback
+   */
   static async verifyVNPayReturn(vnpParams: Record<string, any>): Promise<VNPayCallbackResponse> {
     try {
       // Build query string from vnpParams
@@ -75,7 +154,7 @@ export class PaymentService {
         if (v !== undefined && v !== null) qs.append(k, String(v));
       });
 
-      const url = `${API_ENDPOINT}/payments/payments/vnpay/callback${qs.toString() ? '?' + qs.toString() : ''}`;
+      const url = `${API_ENDPOINT}/payments/vnpay/callback${qs.toString() ? '?' + qs.toString() : ''}`;
       console.log('Calling VNPay callback:', url);
       
       const response = await fetch(url, {
@@ -101,36 +180,4 @@ export class PaymentService {
     }
   }
 
-  // Call backend return endpoint by forwarding VNPay query params.
-  // Backend endpoint: GET /api/payments/payments/vnpay/callback
-  static async getVNPayReturn(vnpParams: Record<string, any> = {}): Promise<VNPayCallbackResponse> {
-    try {
-      // Build query string from vnpParams
-      const qs = new URLSearchParams();
-      Object.entries(vnpParams).forEach(([k, v]) => {
-        if (v !== undefined && v !== null) qs.append(k, String(v));
-      });
-
-      const url = `${API_ENDPOINT}/payments/payments/vnpay/callback${qs.toString() ? '?' + qs.toString() : ''}`;
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          ...ApiService.getAuthHeaders(),
-          'Accept': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const text = await response.text();
-        console.error('getVNPayReturn failed:', response.status, text);
-        throw new Error('Failed to get VNPay return');
-      }
-
-      const result = await response.json();
-      return result;
-    } catch (error) {
-      console.error('Error getting VNPay return:', error);
-      throw error;
-    }
-  }
 }

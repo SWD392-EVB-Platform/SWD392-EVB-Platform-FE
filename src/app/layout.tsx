@@ -2,6 +2,7 @@
 import { AuthProvider } from '@/contexts/AuthContext';
 import type { Metadata } from 'next';
 import ClientLayout from './ClientLayout';
+import ReduxProvider from '@/store/ReduxProvider';
 import './globals.css';
 
 // Metadata ở đây → Server Component → HỢP LỆ
@@ -20,9 +21,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen flex flex-col bg-white">
-        <AuthProvider>
-          <ClientLayout>{children}</ClientLayout>
-        </AuthProvider>
+        <ReduxProvider>
+          <AuthProvider>
+            <ClientLayout>{children}</ClientLayout>
+          </AuthProvider>
+        </ReduxProvider>
       </body>
     </html>
   );
