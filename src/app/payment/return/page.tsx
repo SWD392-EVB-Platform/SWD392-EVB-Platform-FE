@@ -107,9 +107,14 @@ export default function PaymentReturnPage() {
         });
 
         if (!response.ok) {
-          console.error('[Contract] Failed to fetch seller:', response.status, response.statusText);
-          const errorText = await response.text();
-          console.error('[Contract] Error response:', errorText);
+          // Xử lý lỗi 403 (Forbidden) - endpoint có thể yêu cầu quyền admin
+          if (response.status === 403) {
+            console.warn('[Contract] Cannot fetch seller info: API requires admin permission (403). Using default values.');
+            return; // Sử dụng giá trị mặc định
+          }
+          
+          // Các lỗi khác
+          console.warn(`[Contract] Failed to fetch seller: ${response.status} ${response.statusText}`);
           return;
         }
 
@@ -130,7 +135,8 @@ export default function PaymentReturnPage() {
           console.warn('[Contract] Invalid seller data format:', sellerData);
         }
       } catch (error) {
-        console.error('[Contract] Error fetching seller info:', error);
+        // Xử lý lỗi network hoặc lỗi khác một cách im lặng
+        console.warn('[Contract] Error fetching seller info:', error instanceof Error ? error.message : 'Unknown error');
       }
     };
 
