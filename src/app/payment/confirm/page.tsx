@@ -11,6 +11,7 @@ import { OrderService } from '@/features/orders/services/orderService';
 import { PaymentService } from '@/features/payments/services/paymentService';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { clearSelectedProduct } from '@/store/slices/productSlice';
+import { toast } from 'react-toastify';
 
 export default function PaymentConfirmPage() {
   const searchParams = useSearchParams();
@@ -75,13 +76,13 @@ export default function PaymentConfirmPage() {
 
   const handleConfirmPayment = async () => {
     if (!user || !item) {
-      alert('Vui lòng đăng nhập để tiếp tục');
+      toast.error('Vui lòng đăng nhập để tiếp tục');
       return;
     }
 
     // Validate price
     if (!item.priceVnd || item.priceVnd <= 0) {
-      alert('Sản phẩm chưa có giá hoặc giá không hợp lệ. Vui lòng liên hệ người bán.');
+      toast.error('Sản phẩm chưa có giá hoặc giá không hợp lệ. Vui lòng liên hệ người bán.');
       return;
     }
 
@@ -122,7 +123,7 @@ export default function PaymentConfirmPage() {
       dispatch(clearSelectedProduct());
       window.location.href = payment.data.paymentUrl;
     } catch (err: any) {
-      alert(err?.message || 'Không thể hoàn tất giao dịch. Vui lòng thử lại sau.');
+      toast.error(err?.message || 'Không thể hoàn tất giao dịch. Vui lòng thử lại sau.');
       setProcessing(false);
     }
   };

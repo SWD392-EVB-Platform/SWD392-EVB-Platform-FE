@@ -4,6 +4,7 @@
 import { Calendar, Clock, DollarSign, Eye, MessageSquare, Package, Tag, ThumbsUp, TrendingUp, Upload, X } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 const mockListings = [
   { id: 1, title: 'Tesla Model 3 SR+ 2021', seller: 'John Doe', price: '$35,000', views: 12340, likes: 892, comments: 45, status: 'active', date: '2025-11-03', hot: true },
@@ -36,7 +37,7 @@ export default function ListingsPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('New listing created! (Mock)');
+    toast.success('New listing created! (Mock)');
     setIsModalOpen(false);
     // Reset form
     setForm({

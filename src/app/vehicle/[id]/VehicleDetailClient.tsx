@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState } from 'react';
 import { useAppDispatch } from '@/store/hooks';
 import { setSelectedVehicle } from '@/store/slices/productSlice';
+import { toast } from 'react-toastify';
 
 interface VehicleDetailClientProps {
   initialVehicleId: string;
@@ -44,7 +45,7 @@ export default function VehicleDetailClient({ initialVehicleId }: VehicleDetailC
     }
 
     if (!vehicle?.priceVnd || vehicle.priceVnd <= 0) {
-      alert('Không thể thanh toán: Sản phẩm chưa có giá');
+      toast.error('Không thể thanh toán: Sản phẩm chưa có giá');
       return;
     }
 

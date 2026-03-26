@@ -6,6 +6,7 @@ import { Battery } from '@/shared/types/battery';
 import { Vehicle } from '@/shared/types/vehicle';
 import { BatteryService } from '@/features/batteries/services/batteryService';
 import { VehicleService } from '@/features/vehicles/services/vehicleService';
+import { toast } from 'react-toastify';
 
 export default function PaymentPage() {
   const searchParams = useSearchParams();
@@ -53,7 +54,7 @@ export default function PaymentPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement payment processing
-    alert('Payment feature will be implemented soon!');
+    toast.info('Payment feature will be implemented soon!');
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

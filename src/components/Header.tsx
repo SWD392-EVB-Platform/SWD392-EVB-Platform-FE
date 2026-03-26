@@ -14,40 +14,40 @@ const Header: React.FC = () => {
   const isAdmin = !!user && typeof user.role === 'string' && user.role.toLowerCase() === 'admin';
 
   return (
-    <header className="bg-black shadow-lg">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+    <header className="bg-gradient-to-r from-blue-600 via-blue-500 to-green-500 shadow-lg backdrop-blur-sm relative z-50 overflow-visible">
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center relative overflow-visible">
         {/* Logo */}
-        <Link href="/" className="text-2xl font-bold text-white hover:text-yellow-400 transition-colors duration-200">
+        <Link href="/" className="text-2xl font-bold text-white hover:text-blue-100 transition-colors duration-200">
           EVB Platform
         </Link>
 
         {/* Navigation */}
         <nav className="flex space-x-6">
-          <Link href="/" className="text-white hover:text-yellow-400 transition-colors duration-200 font-medium">
+          <Link href="/" className="text-white hover:text-blue-100 transition-colors duration-200 font-medium">
             Home
           </Link>
-          <Link href="/batteries" className="text-white hover:text-yellow-400 transition-colors duration-200 font-medium">
+          <Link href="/batteries" className="text-white hover:text-blue-100 transition-colors duration-200 font-medium">
             EV Batteries
           </Link>
-          <Link href="/vehicles" className="text-white hover:text-yellow-400 transition-colors duration-200 font-medium">
+          <Link href="/vehicles" className="text-white hover:text-blue-100 transition-colors duration-200 font-medium">
             Electric Vehicles
           </Link>
-          <Link href="/about" className="text-white hover:text-yellow-400 transition-colors duration-200 font-medium">
+          <Link href="/about" className="text-white hover:text-blue-100 transition-colors duration-200 font-medium">
             About
           </Link>
-          <Link href="/contact" className="text-white hover:text-yellow-400 transition-colors duration-200 font-medium">
+          <Link href="/contact" className="text-white hover:text-blue-100 transition-colors duration-200 font-medium">
             Contact
           </Link>
         </nav>
 
         {/* Auth Buttons or User Dropdown */}
-        <div className="flex space-x-4">
+        <div className="flex space-x-4 items-center relative overflow-visible">
           <ClientOnly fallback={
             <>
-              <Link href="/login" className="px-4 py-2 border border-white text-white rounded-md hover:bg-white hover:text-black transition-colors duration-200 font-medium">
+              <Link href="/login" className="px-4 py-2 border-2 border-white text-white rounded-lg hover:bg-white/20 transition-colors duration-200 font-medium">
                 Sign in
               </Link>
-              <Link href="/register" className="px-4 py-2 bg-yellow-400 text-black rounded-md hover:bg-yellow-300 transition-colors duration-200 font-medium">
+              <Link href="/register" className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors duration-200 font-semibold shadow-md">
                 Sign up
               </Link>
             </>
@@ -58,10 +58,10 @@ const Header: React.FC = () => {
               <UserDropdown />
             ) : (
               <>
-                <Link href="/login" className="px-4 py-2 border border-white text-white rounded-md hover:bg-white hover:text-black transition-colors duration-200 font-medium">
+                <Link href="/login" className="px-4 py-2 border-2 border-white text-white rounded-lg hover:bg-white/20 transition-colors duration-200 font-medium">
                   Sign in
                 </Link>
-                <Link href="/register" className="px-4 py-2 bg-yellow-400 text-black rounded-md hover:bg-yellow-300 transition-colors duration-200 font-medium">
+                <Link href="/register" className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors duration-200 font-semibold shadow-md">
                   Sign up
                 </Link>
               </>

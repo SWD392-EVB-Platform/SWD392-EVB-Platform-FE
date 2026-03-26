@@ -12,6 +12,7 @@ import { Battery } from '@/shared/types/battery';
 import { Vehicle } from '@/shared/types/vehicle';
 import { useAppSelector } from '@/store/hooks';
 import { ApiService } from '@/lib/api';
+import { toast } from 'react-toastify';
 
 export default function PaymentReturnPage() {
   const searchParams = useSearchParams();
@@ -309,7 +310,7 @@ Ngày lập: ${new Date().toLocaleDateString('vi-VN')}
                       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
                       window.location.href = `${apiUrl}/orders/${encodeURIComponent(oid)}/contracts/download`;
                     } else {
-                      alert('Không tìm thấy mã đơn hàng để tải PDF');
+                      toast.error('Không tìm thấy mã đơn hàng để tải PDF');
                     }
                   }}
                   className="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
@@ -623,13 +624,13 @@ Ngày lập: ${new Date().toLocaleDateString('vi-VN')}
               <button
                 onClick={() => {
                   if (!isAgreeing) {
-                    alert('Vui lòng đọc và đồng ý với các điều khoản hợp đồng');
+                    toast.warning('Vui lòng đọc và đồng ý với các điều khoản hợp đồng');
                     return;
                   }
 
                   // Xác nhận đồng ý
                   setBuyerAgreed(true);
-                  alert('Bạn đã đồng ý với các điều khoản hợp đồng thành công!');
+                  toast.success('Bạn đã đồng ý với các điều khoản hợp đồng thành công!');
                   setShowAgreementModal(false);
                   setIsAgreeing(false);
 
